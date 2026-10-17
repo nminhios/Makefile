@@ -52,8 +52,9 @@
   html,body{width:100%;max-width:100%;overflow-x:hidden;overscroll-behavior-x:none;touch-action:pan-y;}
   body{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
   input[type="color"]{touch-action:manipulation;}
-  #colBox .crow input[type="text"],#holoBox .crow input[type="text"],
-  #colBox .wfld,#colBox .afld,#holoBox .afld,#holoBox .fxrow{display:none!important;}
+  /* Ẩn ô nhập mã HEX để giao diện chỉ còn bộ chọn màu trực quan.
+     Giữ lại các thanh chỉnh thông số và các lựa chọn hiệu ứng. */
+  #colBox .crow input[type="text"],#holoBox .crow input[type="text"]{display:none!important;}
 
 </style></head><body>
 

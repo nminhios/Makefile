@@ -56,6 +56,23 @@
      Giữ lại các thanh chỉnh thông số và các lựa chọn hiệu ứng. */
   #colBox .crow input[type="text"],#holoBox .crow input[type="text"]{display:none!important;}
 
+
+  /* Kết quả gọn: thanh tiến trình và nút tải xuống, không hiển thị bảng thay đổi */
+  .finish-panel{margin-top:18px;text-align:center;padding:clamp(22px,5vw,34px);border-radius:22px;background:linear-gradient(145deg,rgba(8,34,61,.96),rgba(24,17,57,.96));border:1px solid rgba(73,229,255,.24)}
+  .finish-panel h2{margin:12px 0 7px;font-size:20px}
+  .finish-copy{color:var(--muted);font-size:13px;overflow-wrap:anywhere;margin:0 auto 18px}
+  .finish-icon{width:48px;height:48px;margin:0 auto;border-radius:16px;display:grid;place-items:center;background:rgba(53,220,255,.09);border:1px solid rgba(73,229,255,.2)}
+  .finish-spinner{width:23px;height:23px;border:2px solid rgba(73,229,255,.2);border-top-color:#49e5ff;border-radius:50%;animation:finishSpin .8s linear infinite}
+  @keyframes finishSpin{to{transform:rotate(360deg)}}
+  .progress-track{height:9px;overflow:hidden;border-radius:99px;background:rgba(124,150,195,.16);border:1px solid rgba(109,176,255,.13);margin:18px 0 9px}
+  .progress-fill{height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,#36dfff,#628bff,#b17bff);box-shadow:0 0 18px rgba(63,211,255,.35);transition:width .08s linear}
+  .progress-meta{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:11px}
+  .progress-meta b{color:#83edff;font-variant-numeric:tabular-nums}
+  .finish-success{width:48px;height:48px;margin:0 auto;border-radius:16px;display:grid;place-items:center;background:rgba(49,230,174,.1);border:1px solid rgba(49,230,174,.28);color:#57f2bd;font-size:26px;font-weight:800}
+  .download-main{width:100%;max-width:340px;margin:5px auto 0;background:linear-gradient(100deg,#25c9f2,#6478ff 62%,#9b6bff);box-shadow:0 8px 25px rgba(52,159,255,.2)}
+  .continue-wrap{margin-top:13px}
+  .continue-small{padding:8px 12px!important;font-size:11px!important;min-height:32px!important;border-radius:10px!important;background:rgba(117,146,199,.08)!important;border:1px solid rgba(126,166,226,.2)!important;color:#a9c7ed!important;box-shadow:none!important}
+
 </style></head><body>
 
 <meta charset="utf-8">
@@ -1993,29 +2010,46 @@ $('#go').onclick = async () => {
     btn.textContent = label;
   }
 
-  const same = res.out.length === ORIG.length;
-  let nd = 0;
-  if (same) for (let i = 0; i < ORIG.length; i++) if (ORIG[i] !== res.out[i]) nd++;
+  // Chỉ hiển thị tiến trình hoàn tất và kết quả tải xuống; không xuất bảng thay đổi.
+  btn.disabled = true;
+  btn.textContent = 'Đang hoàn tất…';
+  const waitMs = 1000 + Math.floor(Math.random() * 19000);
+  render('#out', `
+    <div class="panel finish-panel" role="status" aria-live="polite">
+      <div class="finish-icon"><span class="finish-spinner"></span></div>
+      <h2>Đang hoàn tất file</h2>
+      <p class="finish-copy">Vui lòng đợi trong giây lát…</p>
+      <div class="progress-track"><div id="finishProgress" class="progress-fill"></div></div>
+      <div class="progress-meta"><span id="finishLabel">Đang xử lý</span><b id="finishPct">0%</b></div>
+    </div>`);
+  const progress = $('#finishProgress');
+  const pct = $('#finishPct');
+  const progressLabel = $('#finishLabel');
+  const startedAt = Date.now();
+  await new Promise(resolve => {
+    const tick = () => {
+      const elapsed = Date.now() - startedAt;
+      const ratio = Math.min(1, elapsed / waitMs);
+      // Ease-out, cập nhật đều để thanh tiến trình chạy từ từ.
+      const eased = 1 - Math.pow(1 - ratio, 1.7);
+      const value = Math.min(100, Math.floor(eased * 100));
+      if (progress) progress.style.width = value + '%';
+      if (pct) pct.textContent = value + '%';
+      if (progressLabel) progressLabel.textContent = value < 35 ? 'Đang chuẩn bị' : value < 75 ? 'Đang hoàn tất' : 'Sắp xong';
+      if (ratio < 1) requestAnimationFrame(tick);
+      else resolve();
+    };
+    requestAnimationFrame(tick);
+  });
 
   render('#out', `
-    <div class="msg ok">${res.note}</div>
-    <div class="panel"><h2>Thay đổi</h2><div class="hexwrap"><table class="hex">
-      <tr>${res.cols.map(c => `<th>${esc(c)}</th>`).join('')}</tr>
-      ${res.rows.map(r => `<tr>
-        <td class="dim">${esc(r[0])}</td><td class="dim">${esc(r[1])}</td>
-        <td class="old">${res.html ? r[2] : esc(r[2])}</td>
-        <td class="new">${res.html ? r[3] : esc(r[3])}</td></tr>`).join('')}
-    </table></div>
-    ${res.extra ? `` : ''}
-    </div>
-    <div class="panel"><h2>Kết quả</h2><table>
-      <tr><td>Dung lượng</td><td>${res.out.length.toLocaleString('vi-VN')} byte ${same ? '— khớp file nguồn' : `— <b>khác nguồn ${(res.out.length-ORIG.length > 0 ? '+' : '')}${res.out.length-ORIG.length}</b>`}</td></tr>
-      ${same ? `<tr><td>Số byte đổi</td><td>${nd.toLocaleString('vi-VN')}</td></tr>` : ''}
-      ${KIND && DET && DET.build ? `<tr><td>Phiên bản</td><td>${esc(DET.build)}</td></tr>` : ''}
-    </table>
-    <div class="note" style="margin-top:12px">File tải về giữ nguyên tên gốc, chép đè thẳng lên file cũ:</div>
-    <span class="fname">${esc(FILE.name)}</span>
-    <div class="row" style="margin-top:14px"><button id="dl">Tải file đã sửa</button></div></div>`);
+    <div class="panel finish-panel finish-done">
+      <div class="finish-success">✓</div>
+      <h2>File đã sẵn sàng</h2>
+      <p class="finish-copy">${esc(FILE.name)}</p>
+      <button id="dl" class="download-main">Tải file</button>
+      <div class="continue-wrap"><button id="continueCreate" class="continue-small" type="button">＋ Tạo file khác</button></div>
+    </div>`);
 
   $('#dl').onclick = () => {
     if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.saveFile) {
@@ -2033,6 +2067,24 @@ $('#go').onclick = async () => {
       setTimeout(() => URL.revokeObjectURL(url), 4000);
     }
   };
+  $('#continueCreate').onclick = () => {
+    $('#file').value = '';
+    $('#out').innerHTML = '';
+    $('#info').innerHTML = '';
+    $('#drop').classList.remove('has');
+    $('#dropText').innerHTML = '<b>Chọn tệp để bắt đầu</b><span>File hỗ trợ: <code>assetindexer</code> · <code>shaders</code> · <code>optionalavatarres_commonab_shader</code></span>';
+    $('#go').disabled = true;
+    for (const el of document.querySelectorAll('.pre')) {
+      el.classList.add('off');
+      el.querySelector('input').checked = false;
+    }
+    for (const id of ['advBox', 'colBox', 'holoBox']) $('#' + id).classList.add('off');
+    FILE = null; ORIG = null; BUN = null; KIND = null; DET = null;
+    window.scrollTo({top: 0, behavior: 'smooth'});
+    $('#file').click();
+  };
+  btn.disabled = false;
+  btn.textContent = label;
 };
 
 /* chọn preset */

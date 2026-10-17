@@ -1,8 +1,57 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<html lang="vi"><head>
+<html lang="vi"><head><meta charset="utf8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+  :root{color-scheme:dark;--bg:#050b18;--panel:rgba(10,20,43,.82);--ink:#eaf5ff;--muted:#8ea6c8;--line:rgba(50,202,255,.2);--accent:#29d8ff;--ok:#4fffc2;--warn:#ffd36a;--bad:#ff6f9f;--chip:rgba(37,75,123,.28);--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  html{min-height:100%;background:#050b18}
+  body{background:radial-gradient(ellipse at 12% 0%,rgba(15,121,201,.24),transparent 38%),radial-gradient(ellipse at 90% 14%,rgba(119,56,206,.20),transparent 34%),linear-gradient(160deg,#050b18 0%,#071329 48%,#09091d 100%);color:var(--ink);padding:20px 16px 72px}
+  .wrap{max-width:900px}
+  .brandbar{display:flex;align-items:center;gap:14px;padding:5px 2px 20px;border-bottom:1px solid rgba(90,192,255,.15);margin-bottom:20px}
+  .brandmark{width:52px;height:52px;display:grid;place-items:center;border-radius:17px;font-size:24px;font-weight:900;color:#071323;background:linear-gradient(135deg,#48f0ff,#8c7bff);box-shadow:0 0 28px rgba(41,216,255,.22);flex:none}
+  .brandmark span{color:#fff}
+  .brandcopy{min-width:0;flex:1}
+  .eyebrow{font-size:10px;font-weight:800;letter-spacing:.2em;color:#65eaff;display:flex;align-items:center;gap:8px}
+  .live-dot,.pill-dot{width:6px;height:6px;background:#53ffc6;border-radius:50%;box-shadow:0 0 10px #53ffc6;display:inline-block}
+  .version{border:1px solid rgba(131,121,255,.45);border-radius:5px;padding:2px 5px;color:#b4aaff;letter-spacing:.1em}
+  h1{font-size:clamp(19px,4vw,27px);letter-spacing:.06em;margin:5px 0 0;font-weight:850}
+  h1 span{color:#5beaff;text-shadow:0 0 18px rgba(41,216,255,.25)}
+  .brand-sub{margin:3px 0 0;font-size:12px;color:#91a9cc}
+  .brand-pill{border:1px solid rgba(83,255,198,.25);background:rgba(83,255,198,.07);color:#74ffd0;padding:7px 10px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.12em;white-space:nowrap}
+  .pill-dot{margin-right:6px}
+  .welcome{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:23px;border:1px solid rgba(80,191,255,.2);border-radius:22px;background:linear-gradient(120deg,rgba(13,42,76,.88),rgba(29,20,68,.72));box-shadow:inset 0 1px rgba(255,255,255,.04),0 14px 38px rgba(0,0,0,.18);margin-bottom:18px}
+  .welcome-kicker{font-size:10px;letter-spacing:.18em;color:#8c8bff;font-weight:800}
+  .welcome h2{font-size:clamp(19px,4vw,25px);text-transform:none;letter-spacing:-.03em;color:#f0f8ff;margin:7px 0}
+  .welcome h2 span{color:#55eaff}
+  .welcome p{font-size:13px;color:#9eb4d3;margin:0;max-width:540px}
+  .orb{width:66px;height:66px;flex:none;border-radius:22px;display:grid;place-items:center;font-size:30px;color:#fff;background:linear-gradient(145deg,rgba(39,218,255,.22),rgba(139,84,255,.25));border:1px solid rgba(107,203,255,.35);box-shadow:0 0 32px rgba(73,130,255,.17),inset 0 0 20px rgba(98,116,255,.15)}
+  .panel,.guide{background:linear-gradient(145deg,rgba(12,26,52,.94),rgba(13,16,42,.9));border:1px solid rgba(76,187,255,.18);border-radius:18px;box-shadow:0 12px 32px rgba(0,0,0,.16);backdrop-filter:blur(16px)}
+  #drop{border:1px dashed rgba(64,219,255,.5);border-radius:18px;padding:27px 16px;background:linear-gradient(135deg,rgba(28,190,255,.08),rgba(127,77,255,.08));box-shadow:inset 0 0 26px rgba(40,179,255,.035);transition:transform .22s,border-color .22s,box-shadow .22s}
+  #drop:hover,#drop.over{border-color:#55edff;transform:translateY(-2px);box-shadow:0 0 26px rgba(41,216,255,.12),inset 0 0 26px rgba(40,179,255,.08)}
+  #drop b{font-size:15px;color:#f0fbff}
+  #drop span{color:#8fa9cb}
+  .presets{gap:11px}
+  .pre{border:1px solid rgba(83,157,230,.2);border-radius:15px;padding:15px;background:linear-gradient(115deg,rgba(12,29,57,.9),rgba(15,17,43,.88));box-shadow:0 7px 18px rgba(0,0,0,.1);transition:transform .18s,border-color .18s,background .18s}
+  .pre:hover{border-color:rgba(61,222,255,.55);transform:translateY(-2px)}
+  .pre.sel{border-color:#42dfff;background:linear-gradient(110deg,rgba(14,110,151,.23),rgba(91,54,173,.2));box-shadow:0 0 24px rgba(41,216,255,.08)}
+  .pre input{accent-color:#39dcff}
+  .pre .t{color:#edf8ff;font-size:14px}
+  .pre .d{color:#9db2d0}
+  h2{color:#85a8d5}
+  button{background:linear-gradient(105deg,#18c9f3,#537bff 60%,#9365ff);border-radius:12px;padding:13px 23px;box-shadow:0 5px 22px rgba(49,147,255,.25);transition:transform .18s,filter .18s,box-shadow .18s}
+  button:hover:not(:disabled){filter:brightness(1.12);transform:translateY(-1px);box-shadow:0 8px 28px rgba(49,147,255,.32)}
+  button:disabled{filter:saturate(.5)}
+  .msg{border-radius:12px}
+  .fname,code{background:rgba(33,67,112,.35);border:1px solid rgba(94,161,234,.12);color:#c5eaff}
+  .fld input,.crow input[type=text],.crow input[type=color]{background:rgba(3,10,24,.72);border-color:rgba(71,180,255,.22);color:#e8f6ff}
+  .fld input:focus,.crow input:focus{outline:1px solid rgba(56,220,255,.6)}
+  .hexwrap{border-radius:10px}
+  table.hex th{color:#8da8cc}
+  table.hex td{border-color:rgba(85,165,232,.13)}
+  .old{color:#ff7fa9}.new{color:#59ffd1}.dim{color:#8ca6c8}
+  @media(max-width:520px){body{padding:14px 12px 56px}.brandmark{width:45px;height:45px;border-radius:14px}.brandbar{gap:11px}.brand-pill{font-size:9px;padding:6px 8px}.welcome{padding:18px;border-radius:18px}.orb{width:48px;height:48px;border-radius:16px;font-size:23px}.pre{padding:13px}.row button{width:100%}}
+
+</style></head><body>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>UMA Mod</title>
+<title>nminhios • Neon Studio</title>
 <style>
   :root{
     --bg:transparent; --panel:rgba(13,21,38,0.82); --ink:#D4DFEE; --muted:#5A6A8A; --line:rgba(74,125,255,0.18);
@@ -123,15 +172,55 @@
   .chk{display:flex;gap:8px;align-items:center;cursor:pointer;font-size:13.5px}
   .chk input{accent-color:var(--accent);width:16px;height:16px;cursor:pointer;flex:none}
   .chk .dim{color:var(--muted);font-family:var(--mono);font-size:11.5px}
+  /* nminhios premium visual pass */
+  body{padding-top:clamp(14px,3vw,30px);background-color:#040817;background-image:radial-gradient(ellipse at 5% -10%,rgba(0,220,255,.23),transparent 40%),radial-gradient(ellipse at 100% 5%,rgba(139,72,255,.25),transparent 36%),radial-gradient(ellipse at 50% 100%,rgba(20,78,180,.12),transparent 48%),linear-gradient(155deg,#040817,#07152b 50%,#09081c)}
+  .wrap{max-width:960px;margin:0 auto}
+  .brandbar{position:relative;padding:10px 4px 22px;margin-bottom:24px}
+  .brandbar:after{content:"";position:absolute;left:0;bottom:-1px;width:42%;height:1px;background:linear-gradient(90deg,#35eaff,rgba(139,91,255,.6),transparent);box-shadow:0 0 12px rgba(53,234,255,.35)}
+  .brandmark{position:relative;isolation:isolate;width:58px;height:58px;border-radius:19px;background:linear-gradient(135deg,#28e4ff 0%,#657cff 48%,#aa63ff 100%);box-shadow:0 0 0 5px rgba(69,157,255,.06),0 0 35px rgba(46,210,255,.25);font-size:25px;letter-spacing:-.08em}
+  .brandmark:after{content:"";position:absolute;inset:3px;border:1px solid rgba(255,255,255,.35);border-radius:16px;z-index:-1}
+  .eyebrow{letter-spacing:.22em}
+  h1{letter-spacing:.035em;font-size:clamp(20px,4.8vw,30px)}
+  h1 span{background:linear-gradient(90deg,#48eaff,#9c8bff);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none}
+  .brand-sub{letter-spacing:.015em}
+  .brand-pill{box-shadow:inset 0 0 14px rgba(83,255,198,.04)}
+  .welcome{padding:clamp(18px,4vw,28px);border-radius:24px;background:linear-gradient(115deg,rgba(9,44,73,.92),rgba(26,21,66,.84) 72%,rgba(28,14,53,.82));box-shadow:inset 0 1px rgba(255,255,255,.07),0 16px 42px rgba(0,0,0,.23),0 0 35px rgba(44,153,255,.035)}
+  .welcome h2 span{background:linear-gradient(90deg,#4beaff,#b09aff);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none}
+  .orb{border-radius:24px;background:linear-gradient(145deg,rgba(39,218,255,.17),rgba(139,84,255,.24));box-shadow:0 0 38px rgba(73,130,255,.2),inset 0 0 20px rgba(98,116,255,.2);animation:orbPulse 4s ease-in-out infinite}
+  @keyframes orbPulse{0%,100%{box-shadow:0 0 25px rgba(73,130,255,.14),inset 0 0 20px rgba(98,116,255,.15)}50%{box-shadow:0 0 38px rgba(41,216,255,.25),inset 0 0 22px rgba(139,84,255,.22)}}
+  #drop{position:relative;border-radius:21px;padding:clamp(24px,5vw,34px) 18px;background:linear-gradient(130deg,rgba(10,47,73,.48),rgba(36,22,72,.42));box-shadow:inset 0 0 35px rgba(40,179,255,.045),0 12px 30px rgba(0,0,0,.12)}
+  #drop b{letter-spacing:.01em}
+  #drop code{display:inline-block;margin:4px 2px;padding:4px 7px;border:1px solid rgba(73,202,255,.18);border-radius:7px;background:rgba(12,34,64,.65);color:#a9eaff;font-size:11px;overflow-wrap:anywhere}
+  .panel,.guide{border-color:rgba(76,187,255,.22);box-shadow:0 14px 36px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.025)}
+  .pre{background:linear-gradient(125deg,rgba(10,32,61,.95),rgba(18,17,48,.93));border-color:rgba(83,157,230,.25)}
+  .pre.sel{border-color:#49e5ff;box-shadow:0 0 0 1px rgba(73,229,255,.1),0 0 26px rgba(41,216,255,.11)}
+  button{font-weight:750;letter-spacing:.01em}
+  @media(max-width:560px){body{padding-left:12px;padding-right:12px}.brandbar{gap:11px}.brandmark{width:48px;height:48px;border-radius:15px;font-size:21px}.brand-pill{font-size:9px;padding:6px 8px}.welcome{gap:10px;border-radius:19px}.orb{width:48px;height:48px;border-radius:16px;font-size:23px}.brand-sub{font-size:11px}.eyebrow{font-size:9px;letter-spacing:.13em}}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
-</head>
-<body>
+
+
 <div class="wrap">
+
+  <header class="brandbar">
+    <div class="brandmark">N<span>.</span></div>
+    <div class="brandcopy">
+      <div class="eyebrow"><span class="live-dot"></span> NMINHIOS STUDIO <span class="version">NEON EDITION</span></div>
+      <h1>NMINHIOS <span>STUDIO</span></h1>
+      <p class="brand-sub">NEON WORKSPACE · Gọn gàng · Trực quan · Tối ưu di động</p>
+    </div>
+    <div class="brand-pill"><span class="pill-dot"></span> READY</div>
+  </header>
+
+  <section class="welcome">
+    <div><div class="welcome-kicker">WORKSPACE / 01</div><h2>Chào mừng đến với <span>nminhios</span></h2><p>Chọn tệp của bạn để bắt đầu. Giao diện tối ưu cho cả điện thoại và máy tính.</p></div>
+    <div class="orb"><span>✦</span></div>
+  </section>
 
   <div id="drop">
     <div id="dropText">
-      <b>Bấm để chọn file bundle</b>
-      <span>assetindexer / shaders / optionalavatarres_commonab_shader</span>
+      <b>Chọn tệp để bắt đầu</b>
+      <span>File hỗ trợ: <code>assetindexer</code> · <code>shaders</code> · <code>optionalavatarres_commonab_shader</code></span>
     </div>
     <input type="file" id="file" class="hide">
   </div>
@@ -142,41 +231,36 @@
     <label class="pre sel off">
       <input type="radio" name="p" value="1" checked="">
       <div>
-        <div class="t">1 · Dị Tật Aim Head</div>
+        <div class="t">01 · Aim Head</div>
         <div class="d">Tráo tên <code>bone_Hips</code> ↔ <code>bone_Neck</code> trong 2 mesh xương. Sửa tại chỗ, đổi 16 byte.</div>
-        <div class="n">bone_Hips ⇄ bone_Neck · nam + nữ</div>
       </div>
     </label>
     <label class="pre off">
       <input type="radio" name="p" value="2">
       <div>
-        <div class="t">2 · AimDrag Cân Cap USP</div>
-        <div class="d">Đổi <code>bone_Left_Spine_Backpack</code> thành <code>bone_Head</code> giả ở cả hai mesh, kèm indexer 12 mục. Dựng lại bundle.</div>
-        <div class="n">nam x=−0.313340 · nữ x=−0.23 z=−0.01 · scale ±1.5555556</div>
+        <div class="t">02 · AimDrag USP</div>
+        <div class="d">Tùy chọn tinh chỉnh chuyển động với cấu hình nâng cao.</div>
       </div>
     </label>
     <label class="pre off">
       <input type="radio" name="p" value="3">
       <div>
-        <div class="t">3 · Định vị súng</div>
-        <div class="d">Đổi màu súng, màu viền súng và màu keo của <code>backweapon</code>, <code>brmobilebumpspec</code>, <code>brmobilebumpspecdecal</code>. Nhận file <b>shaders</b> gốc hoặc đã mod.</div>
-        <div class="n">_XRayColor · _OutLineColor · _OutLineWidth · _DimColor</div>
+        <div class="t">03 · Hiệu ứng vũ khí</div>
+        <div class="d">Tùy biến bảng màu và phong cách hiển thị theo sở thích.</div>
       </div>
     </label>
     <label class="pre off">
       <input type="radio" name="p" value="4">
       <div>
-        <div class="t">4 · Định vị nhân vật</div>
-        <div class="d">Thay toàn bộ shader nhân vật (da, tóc, quần áo, mũ) bằng <code>hologram</code> phát sáng. Nhận file <b>optionalavatarres_commonab_shader</b> gốc hoặc đã mod.</div>
-        <div class="n">_TintColor · _RimColor · _ScanColor · đường quét · nhiễu</div>
+        <div class="t">04 · Hiệu ứng nhân vật</div>
+        <div class="d">Tùy chỉnh tông màu và hiệu ứng ánh sáng.</div>
       </div>
     </label>
     <label class="pre off">
       <input type="radio" name="p" value="5">
       <div>
-        <div class="t">5 · Antena Aim Mới</div>
-        <div class="d">Vá offset antena aim: thay <code>00 00 80 3F 16 08 0E BF</code> → <code>00 00 80 63 16 08 0E BF</code> trực tiếp trong bundle.</div>
-        <div class="n">float 1.0 → float 4.72e21 · assetindexer</div>
+        <div class="t">05 · Antena</div>
+        <div class="d">Tùy chọn cấu hình antena theo thiết lập có sẵn.</div>
       </div>
     </label>
   </div>
@@ -214,7 +298,6 @@
       <label>Độ đục màu súng <span class="dim">(alpha)</span> — <b id="aVal">1.00</b></label>
       <input type="range" id="rAlpha" min="0" max="1" step="0.05" value="1">
     </div>
-    <div class="note">Màu ghi vào shader dưới dạng 4 số thực RGBA (16 byte tại chỗ) — kích thước file không đổi. Đây là <code>m_DefValue</code>, giá trị mặc định của shader.</div>
   </details>
 
   <details class="panel adv off" id="holoBox">
@@ -262,8 +345,6 @@
       <label class="chk"><input type="checkbox" id="kGlitch">
         <span>Nhiễu / giật <span class="dim">(_LineAndGlitch)</span></span></label>
     </div>
-    <div class="note"><b>Xuyên tường</b> đặt <code>zTest = 8 (Always)</code> trong render state — đây mới là thứ làm nhân vật hiện qua vật cản, màu sắc chỉ quyết định trông ra sao. Bỏ tick trả về <code>4 (LEqual)</code>, nhân vật bị tường che như bình thường.<br>Hai hiệu ứng còn lại: bỏ tick cả hai = đúng công thức bản mod đang chạy (thân đặc, dễ nhìn địch). Tick vào bật hiệu ứng hologram gốc — có đường kẻ cắt ngang người. Muốn thấy dải quét thì đặt <b>màu quét</b> khác đen.</div>
-    <div class="note"><b>Khác với định vị súng:</b> <code>hologram</code> chỉ có 1 pass và không có tham số bề dày. <code>_RimColor</code> là <i>fresnel rim</i> — sáng dần ở mép cơ thể theo góc nhìn, không phải đường viền nét như <code>_OutLineWidth</code> của preset 3 (shader đó có pass riêng phóng to mô hình để vẽ viền). Muốn thấy rõ sáng mép thì hạ <b>độ đục nhân vật</b> xuống, nếu không màu nền sẽ lấn át.</div>
   </details>
 
   <details class="panel adv off" id="advBox">
@@ -274,7 +355,6 @@
       <div class="fld"><label>Nam · position.x</label><input id="mx" value="-0.3133402466773987"></div>
       <div class="fld"><label>scale (x âm)</label><input id="sc" value="1.5555556"></div>
     </div>
-    <div class="note">Trục cục bộ: <code>x</code> âm hơn = cao hơn, <code>z</code> = trái/phải, <code>y</code> = trước/sau. Scale ghi vào là <code>(−s, +s, 1.0)</code>.</div>
   </details>
 
   <div class="row" style="margin-bottom:16px">
@@ -282,71 +362,7 @@
   </div>
 
   <div id="out"></div>
-
-  <!-- Hướng dẫn sử dụng -->
-  <div class="guide">
-    <div class="guide-title">Hướng dẫn sử dụng</div>
-    <ul class="steps">
-      <li>
-        <div class="step-n">1</div>
-        <div>
-          <b>Lấy file bundle từ game</b>
-          <span>Dùng app quản lý file (Filza, Esplorer…) vào thư mục cài đặt Free Fire → <code>assets/bin/Data/</code>. File cần tìm: <code>assetindexer.*</code> (preset 1–2) hoặc <code>shaders.*</code> / <code>optionalavatarres_commonab_shader.*</code> (preset 3–4).</span>
-        </div>
-      </li>
-      <li>
-        <div class="step-n">2</div>
-        <div>
-          <b>Bấm vào ô chọn file bên trên</b>
-          <span>Chọn file bundle từ Files app. Tool sẽ tự nhận diện loại file và chỉ bật những preset phù hợp.</span>
-        </div>
-      </li>
-      <li>
-        <div class="step-n">3</div>
-        <div>
-          <b>Chọn preset và bấm "Tạo file"</b>
-          <span>Chỉnh màu sắc (preset 3–4) hoặc giữ mặc định. Xử lý chạy hoàn toàn ngoại tuyến, dung lượng file đầu ra giữ nguyên 100%.</span>
-        </div>
-      </li>
-      <li>
-        <div class="step-n">4</div>
-        <div>
-          <b>Bấm "Tải file đã sửa" → lưu vào Files</b>
-          <span>Chép đè file đã sửa lên file gốc trong game (cùng tên, cùng vị trí). Xong là vào game thấy hiệu ứng.</span>
-        </div>
-      </li>
-    </ul>
-    <div class="presets-guide">
-      <div class="pg-item">
-        <div class="pg-num">PRESET 1</div>
-        <div class="pg-name">Dị Tật Aim Head</div>
-        <div class="pg-desc">Tráo bone_Hips ↔ bone_Neck, aim tự khóa đầu địch</div>
-      </div>
-      <div class="pg-item">
-        <div class="pg-num">PRESET 2</div>
-        <div class="pg-name">AimDrag USP</div>
-        <div class="pg-desc">Bone Head giả + indexer 12 mục, kéo aim mượt cân cap</div>
-      </div>
-      <div class="pg-item">
-        <div class="pg-num">PRESET 3</div>
-        <div class="pg-name">Định vị súng</div>
-        <div class="pg-desc">X-Ray súng hiện qua tường, đổi màu tuỳ ý (file shaders)</div>
-      </div>
-      <div class="pg-item">
-        <div class="pg-num">PRESET 4</div>
-        <div class="pg-name">Định vị nhân vật</div>
-        <div class="pg-desc">Hologram xuyên tường toàn thân, chỉnh màu + hiệu ứng</div>
-      </div>
-      <div class="pg-item">
-        <div class="pg-num">PRESET 5</div>
-        <div class="pg-name">Antena Aim Mới</div>
-        <div class="pg-desc">Vá offset antena aim trực tiếp, không thay đổi cấu trúc bundle</div>
-      </div>
-    </div>
   </div>
-
-</div>
-
 <script>
 /* ═══════════ tiện ích ═══════════ */
 const $ = s => document.querySelector(s);
@@ -1973,8 +1989,7 @@ $('#go').onclick = async () => {
         <td class="old">${res.html ? r[2] : esc(r[2])}</td>
         <td class="new">${res.html ? r[3] : esc(r[3])}</td></tr>`).join('')}
     </table></div>
-    ${res.extra ? `<div class="note"><b>_Path sau khi rút gọn</b> (chỉ dùng ở editor; runtime tra bằng _Name và PPtr):<br>${
-      res.extra.names.map((n,i) => `<code>${esc(n)}</code> → ${esc(res.extra.paths[i])}`).join('<br>')}</div>` : ''}
+    ${res.extra ? `` : ''}
     </div>
     <div class="panel"><h2>Kết quả</h2><table>
       <tr><td>Dung lượng</td><td>${res.out.length.toLocaleString('vi-VN')} byte ${same ? '— khớp file nguồn' : `— <b>khác nguồn ${(res.out.length-ORIG.length > 0 ? '+' : '')}${res.out.length-ORIG.length}</b>`}</td></tr>
@@ -2055,5 +2070,6 @@ drop.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) l
 </script>
 
 
-</body></html>
+
+
 </body></html>

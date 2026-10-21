@@ -64,7 +64,11 @@ h1 span{color:#7A8D3D}
 .upload-symbol{width:36px;height:36px;display:grid;place-items:center;border-radius:12px;background:var(--acid);color:var(--ink);font-size:19px;font-weight:900;margin-bottom:3px}
 #drop b{display:block;max-width:100%;font-size:14px;line-height:1.35;font-weight:850;overflow-wrap:anywhere}
 #drop span{display:block;color:var(--muted);font-size:11px;max-width:100%;overflow-wrap:anywhere}
-#file{display:none}
+/* iOS Safari/WebView: giữ input file thật trong vùng bấm; không dùng display:none
+   và không phụ thuộc input.click() được gọi bằng JavaScript. */
+#drop{position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+#dropText{pointer-events:none}
+#file{display:block;position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;opacity:0;z-index:5;cursor:pointer;font-size:100px;touch-action:manipulation}
 .status{display:flex;align-items:flex-start;gap:10px;border-radius:14px;padding:12px 14px;margin:0 0 14px;font-size:12px;line-height:1.45;background:#fff;border:1px solid var(--line)}
 .status.ready{background:#F4F9E5;border-color:#DCE8BA}
 .status.loading{background:#FFFDF4;border-color:#E9E3C9}
@@ -173,10 +177,10 @@ input[type=range]{width:100%;margin:0;accent-color:#7D9F2C;cursor:pointer}
       <span class="step-no">01</span>
       <div><h3>Chọn file nguồn</h3><p>Chỉ hỗ trợ hai loại shader bên dưới.</p></div>
     </div>
-    <div id="drop">
-      <div id="dropText"><span class="upload-symbol">↑</span><b>Chạm để chọn file</b><span>shaders hoặc optionalavatarres_commonab_shader</span></div>
-      <input type="file" id="file" class="hide" accept="*/*">
-    </div>
+    <label id="drop" for="file" role="button" aria-label="Chọn file shader gốc">
+      <div id="dropText"><span class="upload-symbol">↑</span><b>Chạm để chọn file gốc</b><span>shaders hoặc optionalavatarres_commonab_shader · Hỗ trợ iPhone / iPad</span></div>
+      <input type="file" id="file" accept="*/*" aria-label="Chọn file shader gốc">
+    </label>
   </section>
 
   <div id="info"></div>
@@ -1498,12 +1502,13 @@ for (const [r, out] of [['rTintA','tintAVal'], ['rRimA','rimAVal'], ['rScanA','s
 
 /* drag & drop */
 const drop = $('#drop'), input = $('#file');
-drop.onclick = e => { if (e.target !== input) input.click(); };
-input.onchange = () => {
+/* Không gọi input.click() bằng JS: input tàng hình phủ trực tiếp vùng chọn,
+   để thao tác chạm là tương tác file picker thật của iOS. */
+input.addEventListener('change', () => {
   const f = input.files[0];
   input.value = '';              // để chọn lại cùng file vẫn kích hoạt onchange
   if (f) load(f);
-};
+});
 ['dragenter','dragover'].forEach(ev =>
   drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
 ['dragleave','drop'].forEach(ev =>

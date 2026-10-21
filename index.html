@@ -78,6 +78,7 @@ h1 span{color:#7A8D3D}
 .status-sub{display:block;color:var(--muted);font-size:11px;margin-top:2px}
 .status-tag{margin-left:auto;background:var(--acid);padding:3px 7px;border-radius:7px;font-size:9px;font-weight:900;letter-spacing:.08em;color:var(--acid-dark)}
 .presets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-bottom:14px}
+.presets.single{grid-template-columns:1fr}
 .pre{position:relative;display:flex;flex-direction:column;gap:13px;min-height:154px;padding:15px;border:1.5px solid var(--line);border-radius:19px;cursor:pointer;background:var(--paper);transition:transform .15s,border-color .15s,background .15s;box-shadow:0 5px 15px rgba(35,43,24,.025)}
 .pre:hover{transform:translateY(-2px);border-color:#B7C78B}
 .pre.sel{background:#F5F9E9;border-color:#9FC13C;box-shadow:inset 0 0 0 1px #9FC13C}
@@ -128,12 +129,14 @@ input[type=range]{width:100%;margin:0;accent-color:#7D9F2C;cursor:pointer}
 .complete-copy h3{font-size:21px;letter-spacing:-.045em;line-height:1.2;margin:5px 0 6px;font-weight:950}
 .complete-copy p{font-size:12px;color:#C7CCBE;margin:0;line-height:1.5}
 .save-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:17px}
+.save-actions.single{grid-template-columns:1fr}
 .save-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-width:0;min-height:54px;margin:0;padding:12px;border:0;border-radius:13px;background:var(--acid);color:var(--ink);font-size:11px;line-height:1.25;font-weight:950;text-align:left;box-shadow:0 3px 0 #AFCF3E}
 .save-btn span:first-child{min-width:0;overflow-wrap:anywhere}
 .save-btn span:last-child{font-size:18px;flex:none}
 .save-btn.package-btn{background:#FFE1DA;color:#55271F;box-shadow:0 3px 0 #F0B6A8}
 .package-info{margin-top:13px;padding:11px 12px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.045);font-size:10px;line-height:1.55;color:#C7CCBE;overflow-wrap:anywhere}
 .package-info b{color:#fff;font-weight:850}
+.package-warning{margin-top:12px;padding:11px 12px;border-radius:12px;border:1px solid #F0C3B7;background:#FFF1EC;color:#803E31;font-size:11px;line-height:1.5;overflow-wrap:anywhere}
 @media(max-width:350px){.save-actions{grid-template-columns:1fr}.save-btn{min-height:48px}}
 .footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 4px 0;color:#858B7A;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
 .footer-brand{display:flex;align-items:center;gap:6px;color:#555D47}
@@ -238,12 +241,12 @@ input[type=range]{width:100%;margin:0;accent-color:#7D9F2C;cursor:pointer}
   <div id="out"></div>
   <footer class="footer"><span class="footer-brand"><span></span> nminh ios</span><span>Simple · Clean · Custom</span></footer>
 </div>
-</body>
 <script>
 /* ═══════════ tiện ích ═══════════ */
 const $ = s => document.querySelector(s);
 const hx = n => n.toString(16);
 const esc = s => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const enc = s => new TextEncoder().encode(s);
 const a4 = n => (n + 3) & ~3;
 
 /* ═══════════ LZ4 ═══════════ */
@@ -1328,6 +1331,8 @@ function applyKind(kind){
   if (firstOk && !pres.some(e => e.querySelector('input').checked)){
     firstOk.querySelector('input').checked = true;
   }
+  const availableCount = pres.filter(el => !el.classList.contains('off')).length;
+  $('#presets').classList.toggle('single', availableCount === 1);
   syncPanels();
 }
 
@@ -1388,7 +1393,7 @@ $('#go').onclick = async () => {
   btn.disabled = true;
   const originalButtonHTML = btn.innerHTML;
   btn.innerHTML = '<span>Đang xử lý và đóng gói…</span>';
-  let res, patchPackage, packageMeta;
+  let res, patchPackage, packageMeta, packageError = null;
   try {
     if (p === '3') {
       const grab = (id, name) => {
@@ -1420,7 +1425,13 @@ $('#go').onclick = async () => {
       });
     }
     packageMeta = packageMetadataForPreset(p);
-    patchPackage = await create3105Package(res.out, packageMeta);
+    /* Nếu Web Crypto bị khóa trong trình xem HTML nhúng, vẫn cho tải file shader thường. */
+    try {
+      patchPackage = await create3105Package(res.out, packageMeta);
+    } catch (e) {
+      patchPackage = null;
+      packageError = e;
+    }
   } catch(e){
     render('#out', `<div class="status error">${esc(e.message || 'Không thể tạo file. Hãy kiểm tra file gốc rồi thử lại.')}</div>`);
     return;
@@ -1434,20 +1445,23 @@ $('#go').onclick = async () => {
     <div class="complete-card">
       <div class="complete-mark">✓</div>
       <div class="complete-copy">
-        <span class="complete-kicker">HOÀN TẤT · 2 ĐỊNH DẠNG</span>
-        <h3>Đã tạo xong 2 file</h3>
-        <p>${kindName} đã sẵn sàng. Lưu file thường để sử dụng thủ công hoặc lưu gói .3105 để nhập vào 3105.</p>
+        <span class="complete-kicker">${patchPackage ? 'HOÀN TẤT · 2 ĐỊNH DẠNG' : 'HOÀN TẤT · FILE THƯỜNG'}</span>
+        <h3>${patchPackage ? 'Đã tạo xong 2 file' : 'Đã tạo file đã chỉnh'}</h3>
+        <p>${patchPackage
+          ? `${kindName} đã sẵn sàng. Bạn có thể lưu file thường hoặc gói .3105 để nhập vào 3105.`
+          : `${kindName} đã được xử lý. Bạn vẫn có thể lưu file thường; gói .3105 chưa tạo được trong trình duyệt hiện tại.`}</p>
       </div>
-      <div class="save-actions">
+      <div class="save-actions ${patchPackage ? '' : 'single'}">
         <button id="dlNormal" class="save-btn" type="button"><span>File đã chỉnh</span><span aria-hidden="true">↓</span></button>
-        <button id="dl3105" class="save-btn package-btn" type="button"><span>Gói .3105</span><span aria-hidden="true">↗</span></button>
+        ${patchPackage ? '<button id="dl3105" class="save-btn package-btn" type="button"><span>Gói .3105</span><span aria-hidden="true">↗</span></button>' : ''}
       </div>
-      <div class="package-info"><b>${esc(packageMeta.name)}</b> · Tác giả: <b>${esc(packageMeta.author)}</b><br>Application · <b>com.dts.freefireth</b><br>Đóng gói theo định dạng Patch 3105; đường dẫn đích được lưu bên trong gói.</div>
+      ${patchPackage ? `<div class="package-info"><b>${esc(packageMeta.name)}</b> · Tác giả: <b>${esc(packageMeta.author)}</b><br>Application · <b>com.dts.freefireth</b><br>Đóng gói theo định dạng Patch 3105; đường dẫn đích được lưu bên trong gói.</div>` : ''}
+      ${packageError ? `<div class="package-warning">Không tạo được gói .3105: ${esc(packageError.message || 'Trình duyệt không hỗ trợ mã hóa cần thiết')}. File shader thường vẫn có thể lưu.</div>` : ''}
     </div>`);
 
   function saveBytes(bytes, name){
     if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.saveFile) {
-      const CHUNK = 65536;
+      const CHUNK = 32768;
       const parts = [];
       for (let i = 0; i < bytes.length; i += CHUNK)
         parts.push(String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + CHUNK, bytes.length))));
@@ -1461,7 +1475,7 @@ $('#go').onclick = async () => {
     }
   }
   $('#dlNormal').onclick = () => saveBytes(res.out, FILE.name);
-  $('#dl3105').onclick = () => saveBytes(patchPackage, packageMeta.downloadName);
+  if (patchPackage) $('#dl3105').onclick = () => saveBytes(patchPackage, packageMeta.downloadName);
 };
 
 /* chọn preset */
@@ -1515,4 +1529,5 @@ input.addEventListener('change', () => {
   drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
 drop.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) load(f); });
 </script>
+</body>
 </html>

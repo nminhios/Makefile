@@ -99,7 +99,7 @@ h1 span{color:#7A8D3D}
 .cfld label .dim{display:block;font-weight:500;color:var(--muted);font-family:var(--mono);font-size:9px;margin-top:2px}
 .crow{display:flex;align-items:center;gap:7px}
 .crow input[type=color]{width:39px;height:37px;padding:3px;border:1px solid #DDE2D4;border-radius:11px;background:#fff;cursor:pointer;flex:none}
-.crow input[type=text]{width:100%;min-width:0;padding:9px 7px;border:1px solid #E0E4D9;border-radius:9px;background:white;color:var(--ink);font:11px var(--mono);text-transform:uppercase;outline:none}
+.crow input[type=text]{flex:1;width:100%;min-width:0;padding:9px 7px;border:1px solid #E0E4D9;border-radius:9px;background:white;color:var(--ink);font:11px var(--mono);text-transform:uppercase;outline:none}
 .crow input[type=text]:focus{border-color:#9FC13C;box-shadow:0 0 0 3px rgba(159,193,60,.15)}
 .crow input[type=text].bad{border-color:var(--coral)}
 .wfld,.afld{margin-top:17px;padding:12px 13px;border-radius:14px;background:#F8F9F4;border:1px solid #E9ECE3}
@@ -123,8 +123,14 @@ input[type=range]{width:100%;margin:0;accent-color:#7D9F2C;cursor:pointer}
 .complete-kicker{font-size:9px;letter-spacing:.16em;font-weight:900;color:var(--acid)}
 .complete-copy h3{font-size:21px;letter-spacing:-.045em;line-height:1.2;margin:5px 0 6px;font-weight:950}
 .complete-copy p{font-size:12px;color:#C7CCBE;margin:0;line-height:1.5}
-.save-btn{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;margin-top:17px;padding:13px 14px;border:0;border-radius:13px;background:var(--acid);color:var(--ink);font-size:12px;font-weight:950}
-.save-btn span:last-child{font-size:18px}
+.save-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:17px}
+.save-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-width:0;min-height:54px;margin:0;padding:12px;border:0;border-radius:13px;background:var(--acid);color:var(--ink);font-size:11px;line-height:1.25;font-weight:950;text-align:left;box-shadow:0 3px 0 #AFCF3E}
+.save-btn span:first-child{min-width:0;overflow-wrap:anywhere}
+.save-btn span:last-child{font-size:18px;flex:none}
+.save-btn.package-btn{background:#FFE1DA;color:#55271F;box-shadow:0 3px 0 #F0B6A8}
+.package-info{margin-top:13px;padding:11px 12px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.045);font-size:10px;line-height:1.55;color:#C7CCBE;overflow-wrap:anywhere}
+.package-info b{color:#fff;font-weight:850}
+@media(max-width:350px){.save-actions{grid-template-columns:1fr}.save-btn{min-height:48px}}
 .footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 4px 0;color:#858B7A;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
 .footer-brand{display:flex;align-items:center;gap:6px;color:#555D47}
 .footer-brand span{display:inline-block;width:6px;height:6px;border-radius:2px;background:var(--coral);transform:rotate(45deg)}
@@ -1098,6 +1104,154 @@ async function applyPreset4(orig, b, opt){
   };
 }
 
+/* ═══════════ binary plist + định dạng Patch 3105 ═══════════
+   Cấu trúc dựa trên PatchPackageCodec trong mã nguồn 3105-main.zip:
+   magic + binary Property List Envelope; Payload dùng AES-GCM, SHA-256.
+*/
+const P3105_MAGIC = new TextEncoder().encode('3105PATCH\0');
+const P3105_EPOCH = 978307200; // Unix -> Apple plist epoch (2001-01-01)
+const concatU8 = (...parts) => {
+  const total = parts.reduce((n, part) => n + part.length, 0);
+  const out = new Uint8Array(total);
+  let offset = 0;
+  for (const part of parts) { out.set(part, offset); offset += part.length; }
+  return out;
+};
+function p3105IntBytes(value, width){
+  let n = BigInt(value); const out = new Uint8Array(width);
+  for (let i = width - 1; i >= 0; i--){ out[i] = Number(n & 255n); n >>= 8n; }
+  return out;
+}
+function p3105Width(value){
+  if (value <= 0xFF) return 1;
+  if (value <= 0xFFFF) return 2;
+  if (value <= 0xFFFFFFFF) return 4;
+  return 8;
+}
+function p3105Integer(value){
+  const width = p3105Width(value);
+  return concatU8(Uint8Array.of(0x10 | Math.log2(width)), p3105IntBytes(value, width));
+}
+function p3105LengthHead(marker, length){
+  return length < 15 ? Uint8Array.of(marker | length)
+    : concatU8(Uint8Array.of(marker | 15), p3105Integer(length));
+}
+function p3105UTF16BE(value){
+  const out = new Uint8Array(value.length * 2);
+  for (let i = 0; i < value.length; i++){
+    const code = value.charCodeAt(i); out[i*2] = code >> 8; out[i*2+1] = code & 255;
+  }
+  return out;
+}
+function encodeBinaryPlist(root){
+  const nodes = [];
+  function add(value){
+    const id = nodes.length; nodes.push(null);
+    if (value === true || value === false){ nodes[id] = {raw:Uint8Array.of(value ? 0x09 : 0x08)}; return id; }
+    if (value instanceof Date){
+      const raw = new Uint8Array(9); raw[0] = 0x33;
+      new DataView(raw.buffer).setFloat64(1, value.getTime()/1000-P3105_EPOCH, false);
+      nodes[id] = {raw}; return id;
+    }
+    if (value instanceof Uint8Array || value instanceof ArrayBuffer){
+      const data = value instanceof Uint8Array ? value : new Uint8Array(value);
+      nodes[id] = {raw:concatU8(p3105LengthHead(0x40, data.length), data)}; return id;
+    }
+    if (typeof value === 'number' && Number.isSafeInteger(value) && value >= 0){
+      nodes[id] = {raw:p3105Integer(value)}; return id;
+    }
+    if (typeof value === 'string'){
+      if ([...value].every(ch => ch.charCodeAt(0) <= 127)){
+        const data = new TextEncoder().encode(value);
+        nodes[id] = {raw:concatU8(p3105LengthHead(0x50, data.length), data)};
+      } else {
+        const data = p3105UTF16BE(value);
+        nodes[id] = {raw:concatU8(p3105LengthHead(0x60, value.length), data)};
+      }
+      return id;
+    }
+    if (Array.isArray(value)){ nodes[id] = {array:value.map(add)}; return id; }
+    if (value && typeof value === 'object'){
+      const keys = Object.keys(value).filter(key => value[key] !== undefined);
+      nodes[id] = {dictKeys:keys.map(add), dictValues:keys.map(key => add(value[key]))};
+      return id;
+    }
+    throw new Error('Không thể đóng gói dữ liệu .3105 có kiểu không hỗ trợ.');
+  }
+  const topObject = add(root);
+  const refSize = p3105Width(nodes.length - 1);
+  const encodedObjects = nodes.map(node => {
+    if (node.raw) return node.raw;
+    if (node.array) return concatU8(p3105LengthHead(0xA0,node.array.length), ...node.array.map(id=>p3105IntBytes(id,refSize)));
+    return concatU8(p3105LengthHead(0xD0,node.dictKeys.length),
+      ...node.dictKeys.map(id=>p3105IntBytes(id,refSize)),
+      ...node.dictValues.map(id=>p3105IntBytes(id,refSize)));
+  });
+  let offset = 8; const offsets = [];
+  for (const obj of encodedObjects){ offsets.push(offset); offset += obj.length; }
+  const offsetTableOffset = offset;
+  const offsetSize = p3105Width(Math.max(offsetTableOffset, ...offsets));
+  const offsetTable = concatU8(...offsets.map(value=>p3105IntBytes(value,offsetSize)));
+  const trailer = new Uint8Array(32);
+  trailer[6] = offsetSize; trailer[7] = refSize;
+  trailer.set(p3105IntBytes(nodes.length,8),8);
+  trailer.set(p3105IntBytes(topObject,8),16);
+  trailer.set(p3105IntBytes(offsetTableOffset,8),24);
+  return concatU8(new TextEncoder().encode('bplist00'), ...encodedObjects, offsetTable, trailer);
+}
+function p3105UUID(){
+  const data = crypto.getRandomValues(new Uint8Array(16));
+  data[6] = (data[6] & 0x0F) | 0x40; data[8] = (data[8] & 0x3F) | 0x80;
+  const hex = [...data].map(n=>n.toString(16).padStart(2,'0')).join('').toUpperCase();
+  return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+}
+function packageMetadataForPreset(preset){
+  if (preset === '3') return {
+    name:'dvi súng nminhios', author:'nminhios', downloadName:'dvi súng nminhios.3105',
+    path:'Documents/contentcache/Optional/ios/gameassetbundles/shaders.P0K3UG2TfecMBhWMMV~2Fu8ReudIk~3D',
+    targetFilename:'shaders.P0K3UG2TfecMBhWMMV~2Fu8ReudIk~3D'
+  };
+  return {
+    name:'dvi người nminhios', author:'nminh ios', downloadName:'dvi người nminhios.3105',
+    path:'Documents/contentcache/Optional/ios/optionalavatarres/gameassetbundles/optionalavatarres_commonab_shader.BNrjwQsbTrqz6jACY9i6FB6DyYI~3D',
+    targetFilename:'optionalavatarres_commonab_shader.BNrjwQsbTrqz6jACY9i6FB6DyYI~3D'
+  };
+}
+async function create3105Package(replacementData, meta){
+  if (!globalThis.crypto?.subtle || !globalThis.crypto?.getRandomValues)
+    throw new Error('Trình duyệt hiện tại không hỗ trợ mã hóa cần thiết để tạo gói .3105. Hãy mở HTML bằng Safari hoặc trình duyệt hỗ trợ Web Crypto.');
+  const bundleID = 'com.dts.freefireth';
+  const packageID = p3105UUID(), ruleID = p3105UUID();
+  const replacementDigest = new Uint8Array(await crypto.subtle.digest('SHA-256', replacementData));
+  const contentKey = crypto.getRandomValues(new Uint8Array(32));
+  const nonce = crypto.getRandomValues(new Uint8Array(12));
+  const now = new Date();
+  const project = {
+    id:packageID, name:meta.name, author:meta.author, isPrivate:false,
+    createdAt:now, updatedAt:now, bundleIdentifiers:[bundleID], directories:[],
+    rules:[{
+      id:ruleID, bundleID, relativePath:meta.path,
+      replacementFilename:meta.targetFilename, replacementData
+    }]
+  };
+  const payload = encodeBinaryPlist({
+    project,
+    replacementDigests:{[ruleID]:replacementDigest}
+  });
+  const key = await crypto.subtle.importKey('raw', contentKey, {name:'AES-GCM'}, false, ['encrypt']);
+  const aad = new TextEncoder().encode(`3105PATCH/v3/payload/${packageID}`);
+  const ciphertextAndTag = new Uint8Array(await crypto.subtle.encrypt(
+    {name:'AES-GCM', iv:nonce, additionalData:aad, tagLength:128}, key, payload
+  ));
+  const encryptedPayload = concatU8(nonce, ciphertextAndTag); // CryptoKit combined format: nonce + ciphertext + tag
+  const fingerprint = new Uint8Array(await crypto.subtle.digest('SHA-256', contentKey));
+  const envelope = {
+    schemaVersion:3, packageID, isPasswordProtected:false,
+    publicContentKey:contentKey, keyFingerprint:fingerprint, encryptedPayload
+  };
+  return concatU8(P3105_MAGIC, encodeBinaryPlist(envelope));
+}
+
 /* ═══════════ giao diện ═══════════ */
 let FILE = null, ORIG = null, BUN = null, KIND = null, DET = null;
 function render(el, html){ $(el).innerHTML = html; }
@@ -1228,9 +1382,9 @@ $('#go').onclick = async () => {
   const p = selected.value;
   const btn = $('#go');
   btn.disabled = true;
-  const label = btn.textContent;
-  btn.textContent = 'Đang xử lý…';
-  let res;
+  const originalButtonHTML = btn.innerHTML;
+  btn.innerHTML = '<span>Đang xử lý và đóng gói…</span>';
+  let res, patchPackage, packageMeta;
   try {
     if (p === '3') {
       const grab = (id, name) => {
@@ -1261,12 +1415,14 @@ $('#go').onclick = async () => {
         glitch: $('#kGlitch').checked
       });
     }
+    packageMeta = packageMetadataForPreset(p);
+    patchPackage = await create3105Package(res.out, packageMeta);
   } catch(e){
-    render('#out', `<div class="status error">${esc(e.message || 'Không thể áp dụng tuỳ chỉnh. Hãy thử lại với file gốc phù hợp.')}</div>`);
+    render('#out', `<div class="status error">${esc(e.message || 'Không thể tạo file. Hãy kiểm tra file gốc rồi thử lại.')}</div>`);
     return;
   } finally {
     btn.disabled = false;
-    btn.textContent = label;
+    btn.innerHTML = originalButtonHTML;
   }
 
   const kindName = p === '3' ? 'Shader súng' : 'Shader nhân vật';
@@ -1274,29 +1430,34 @@ $('#go').onclick = async () => {
     <div class="complete-card">
       <div class="complete-mark">✓</div>
       <div class="complete-copy">
-        <span class="complete-kicker">HOÀN TẤT</span>
-        <h3>Đã áp dụng tuỳ chỉnh</h3>
-        <p>${kindName} đã sẵn sàng. Nhấn nút bên dưới để lưu file.</p>
+        <span class="complete-kicker">HOÀN TẤT · 2 ĐỊNH DẠNG</span>
+        <h3>Đã tạo xong 2 file</h3>
+        <p>${kindName} đã sẵn sàng. Lưu file thường để sử dụng thủ công hoặc lưu gói .3105 để nhập vào 3105.</p>
       </div>
-      <button id="dl" class="save-btn" type="button"><span>Lưu file đã chỉnh</span><span aria-hidden="true">↗</span></button>
+      <div class="save-actions">
+        <button id="dlNormal" class="save-btn" type="button"><span>File đã chỉnh</span><span aria-hidden="true">↓</span></button>
+        <button id="dl3105" class="save-btn package-btn" type="button"><span>Gói .3105</span><span aria-hidden="true">↗</span></button>
+      </div>
+      <div class="package-info"><b>${esc(packageMeta.name)}</b> · Tác giả: <b>${esc(packageMeta.author)}</b><br>Application · <b>com.dts.freefireth</b><br>Đóng gói theo định dạng Patch 3105; đường dẫn đích được lưu bên trong gói.</div>
     </div>`);
 
-  $('#dl').onclick = () => {
+  function saveBytes(bytes, name){
     if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.saveFile) {
-      const bytes = res.out;
       const CHUNK = 65536;
       const parts = [];
       for (let i = 0; i < bytes.length; i += CHUNK)
         parts.push(String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + CHUNK, bytes.length))));
-      window.webkit.messageHandlers.saveFile.postMessage({name: FILE.name, b64: btoa(parts.join(''))});
+      window.webkit.messageHandlers.saveFile.postMessage({name, b64: btoa(parts.join(''))});
     } else {
-      const url = URL.createObjectURL(new Blob([res.out], { type:'application/octet-stream' }));
+      const url = URL.createObjectURL(new Blob([bytes], { type:'application/octet-stream' }));
       const a = document.createElement('a');
-      a.href = url; a.download = FILE.name;
+      a.href = url; a.download = name;
       document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      setTimeout(() => URL.revokeObjectURL(url), 6000);
     }
-  };
+  }
+  $('#dlNormal').onclick = () => saveBytes(res.out, FILE.name);
+  $('#dl3105').onclick = () => saveBytes(patchPackage, packageMeta.downloadName);
 };
 
 /* chọn preset */

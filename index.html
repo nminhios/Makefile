@@ -1,374 +1,240 @@
 <!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f4f5f0">
-  <meta name="description" content="NMINHIOS Asset Lab — công cụ chỉnh sửa bundle trực tiếp trên trình duyệt.">
-  <title>NMINHIOS — Asset Lab</title>
-  <style>
-    :root {
-      color-scheme: light;
-      --page: #f4f5f0;
-      --paper: #ffffff;
-      --ink: #202a25;
-      --muted: #6c7971;
-      --line: #dce3da;
-      --accent: #f15d3a;
-      --accent-deep: #d94828;
-      --forest: #243b32;
-      --forest-soft: #e8eee6;
-      --chip: #f0f3ee;
-      --ok: #19784c;
-      --warn: #8b5d0c;
-      --bad: #bd3f3f;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      --shadow: 0 16px 42px rgba(34, 50, 40, .065);
-    }
-    * { box-sizing: border-box; }
-    html { min-height: 100%; background: var(--page); }
-    body {
-      margin: 0; min-height: 100%; padding: 18px 18px 56px;
-      background: var(--page); color: var(--ink);
-      font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Helvetica Neue", system-ui, sans-serif;
-      -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
-    }
-    button, input { font: inherit; }
-    button { cursor: pointer; }
-    .app-shell { width: min(100%, 1080px); margin: 0 auto; }
-
-    /* New identity: bright editorial workspace instead of the previous neon/glass layout. */
-    .topbar {
-      display: flex; align-items: center; justify-content: space-between; gap: 18px;
-      padding: 4px 0 22px; margin-bottom: 26px; border-bottom: 1px solid var(--line);
-    }
-    .brand-lockup { display: flex; align-items: center; gap: 14px; min-width: 0; }
-    .brandmark {
-      width: 62px; height: 62px; flex: 0 0 62px; overflow: hidden;
-      display: grid; place-items: center; border-radius: 20px;
-      background: var(--forest); border: 1px solid rgba(32,42,37,.08);
-      box-shadow: 0 6px 16px rgba(36,59,50,.12);
-    }
-    .brandmark img { width: 100%; height: 100%; display: block; object-fit: cover; }
-    .brandmark.avatar-fallback::after { content: "✦"; color: #fff; font-size: 27px; font-weight: 900; }
-    .brand-copy { min-width: 0; }
-    .brand-eyebrow { color: var(--muted); font-size: 10px; line-height: 1.4; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; }
-    h1 { margin: 3px 0 0; font-size: clamp(21px, 3.6vw, 29px); font-weight: 900; letter-spacing: -.06em; line-height: 1.1; }
-    h1 span { color: var(--accent); }
-    .brand-sub { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
-    .top-state { flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 11px; border: 1px solid #d4ded3; border-radius: 999px; background: #fff; color: var(--forest); font-size: 10px; font-weight: 850; letter-spacing: .12em; white-space: nowrap; }
-    .state-dot { width: 7px; height: 7px; border-radius: 50%; background: #39a86c; box-shadow: 0 0 0 3px rgba(57,168,108,.12); }
-
-    .hero {
-      display: grid; grid-template-columns: minmax(0, 1fr) 180px; align-items: center; gap: 22px;
-      padding: clamp(24px, 5vw, 42px); margin-bottom: 32px; min-height: 220px;
-      border: 1px solid #dce4d8; border-radius: 28px; background: #e9eee5;
-      position: relative; overflow: hidden;
-    }
-    .hero::after { content: ""; position: absolute; left: 0; bottom: 0; width: 120px; height: 5px; background: var(--accent); }
-    .hero-copy { position: relative; z-index: 1; }
-    .hero-kicker, .step-label { color: var(--accent-deep); font-size: 10px; font-weight: 900; letter-spacing: .18em; text-transform: uppercase; }
-    .hero h2 { max-width: 650px; margin: 10px 0 12px; color: var(--ink); font-size: clamp(28px, 5.6vw, 46px); letter-spacing: -.065em; line-height: 1.04; }
-    .hero h2 span { color: var(--accent); }
-    .hero p { max-width: 560px; margin: 0; color: #58665d; font-size: 14px; }
-    .hero-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 20px; }
-    .hero-tags span { padding: 6px 10px; border-radius: 999px; border: 1px solid #d2dbcf; background: rgba(255,255,255,.55); color: #46564b; font-size: 11px; font-weight: 750; }
-    .hero-art { width: 152px; height: 152px; justify-self: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 50%; position: relative; color: white; background: var(--accent); transform: rotate(7deg); box-shadow: 10px 15px 0 rgba(36,59,50,.10); }
-    .hero-art::before { content: ""; position: absolute; inset: 9px; border: 1px solid rgba(255,255,255,.5); border-radius: 50%; }
-    .hero-art small { font-size: 9px; font-weight: 900; letter-spacing: .26em; }
-    .hero-art strong { font-size: 56px; line-height: 1; letter-spacing: -.09em; }
-    .hero-art span { font-size: 10px; font-weight: 800; letter-spacing: .2em; }
-
-    .section { margin: 0 0 30px; }
-    .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin: 0 0 13px; }
-    .section-heading h2 { margin: 3px 0 0; color: var(--ink); font-size: clamp(20px, 3vw, 25px); line-height: 1.2; letter-spacing: -.045em; }
-    .section-heading p { max-width: 410px; margin: 0; color: var(--muted); font-size: 12px; text-align: right; }
-    .step-label { color: #879188; }
-
-    #drop {
-      display: block; position: relative; overflow: hidden; padding: 28px 18px; min-height: 190px;
-      border: 1.5px dashed #bdcbbf; border-radius: 22px; background: var(--paper);
-      text-align: center; cursor: pointer; transition: border-color .18s, background .18s, transform .18s;
-    }
-    #drop:hover, #drop.over { border-color: var(--accent); background: #fffaf7; transform: translateY(-1px); }
-    #drop.has { border-style: solid; border-color: #b9c9ba; background: #fff; }
-    #dropText { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; min-height: 130px; overflow-wrap: anywhere; }
-    #dropText::before { content: "↑"; width: 42px; height: 42px; display: grid; place-items: center; margin-bottom: 4px; border-radius: 14px; background: var(--forest-soft); color: var(--forest); font-size: 25px; font-weight: 800; line-height: 1; }
-    #drop.has #dropText::before { content: "✓"; background: #e7f5eb; color: var(--ok); font-size: 20px; }
-    #drop b { max-width: 100%; color: var(--ink); font-size: 16px; font-weight: 850; }
-    #drop span { color: var(--muted); font-size: 12px; }
-    #drop code { display: inline-block; margin: 5px 3px 0; padding: 4px 7px; border: 1px solid var(--line); border-radius: 6px; background: var(--chip); color: #46564b; font: 10px/1.4 var(--mono); overflow-wrap: anywhere; }
-    .hide, .off { display: none !important; }
-
-    .presets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-    .pre {
-      position: relative; display: flex; align-items: flex-start; gap: 12px; min-width: 0;
-      padding: 17px 16px; border: 1px solid var(--line); border-radius: 17px;
-      background: var(--paper); cursor: pointer; transition: border-color .16s, box-shadow .16s, transform .16s;
-    }
-    .pre:hover { border-color: #aebcaf; transform: translateY(-1px); }
-    .pre.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 8px 24px rgba(241,93,58,.075); }
-    .pre input { margin: 5px 0 0; flex: 0 0 auto; accent-color: var(--accent); }
-    .pre .preset-code { flex: 0 0 34px; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 11px; background: var(--chip); color: #56635a; font: 800 11px var(--mono); }
-    .pre.sel .preset-code { background: var(--accent); color: #fff; }
-    .pre-copy { min-width: 0; flex: 1; }
-    .pre .t { margin: 0 0 4px; color: var(--ink); font-size: 14px; font-weight: 850; line-height: 1.35; }
-    .pre .d { color: var(--muted); font-size: 12px; line-height: 1.5; }
-    .pre .preset-arrow { color: #9ba69d; font-size: 17px; font-weight: 800; line-height: 1; }
-    .pre.sel .preset-arrow { color: var(--accent); }
-
-    .panel, .guide { padding: 19px; border: 1px solid var(--line); border-radius: 18px; background: var(--paper); box-shadow: var(--shadow); }
-    .adv { margin-top: 13px; }
-    .adv summary { display: flex; align-items: center; gap: 8px; color: var(--forest); font-size: 13px; font-weight: 850; cursor: pointer; list-style-position: inside; }
-    .cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
-    .cfld label, .fld label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 12px; font-weight: 700; }
-    .crow { display: flex; align-items: center; gap: 8px; }
-    .crow input[type=color] { width: 48px; height: 40px; padding: 3px; border: 1px solid var(--line); border-radius: 10px; background: #fff; cursor: pointer; flex: none; }
-    .crow input[type=text], .fld input { width: 100%; min-width: 0; padding: 9px 10px; border: 1px solid var(--line); border-radius: 9px; background: #f8faf7; color: var(--ink); font: 12px var(--mono); }
-    .crow input[type=text] { text-transform: uppercase; }
-    #colBox .crow input[type=text], #holoBox .crow input[type=text] { display: none !important; }
-    .flds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 15px; }
-    .wfld, .afld { margin-top: 16px; }
-    .wfld label, .afld label { display: block; margin-bottom: 7px; color: var(--muted); font-size: 12px; }
-    .wfld label b, .afld label b { color: var(--ink); font-family: var(--mono); }
-    input[type=range] { width: 100%; accent-color: var(--accent); }
-    .fxrow { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 18px; }
-    .chk { display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--ink); font-size: 13px; }
-    .chk input { width: 16px; height: 16px; accent-color: var(--accent); }
-
-    .action-panel { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 26px; padding: 22px; border: 1px solid #d7dfd4; border-radius: 20px; background: #e9eee5; }
-    .action-copy h2 { margin: 3px 0 5px; font-size: 20px; letter-spacing: -.04em; }
-    .action-copy p { margin: 0; color: var(--muted); font-size: 12px; }
-    .row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-    button { border: 0; border-radius: 12px; padding: 13px 22px; color: white; background: var(--forest); font-weight: 850; box-shadow: 0 5px 0 #182c24; transition: transform .12s, box-shadow .12s, background .12s; }
-    button:hover:not(:disabled) { background: #304d40; transform: translateY(-1px); box-shadow: 0 6px 0 #182c24; }
-    button:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 0 #182c24; }
-    button:disabled { opacity: .42; cursor: not-allowed; box-shadow: none; }
-    #go { min-width: 168px; }
-    #go::after { content: "  ↗"; color: #ffb49f; }
-    #out { margin-top: 15px; }
-    .msg { padding: 12px 14px; margin: 0 0 12px; border: 1px solid var(--line); border-radius: 12px; font-size: 13px; overflow-wrap: anywhere; }
-    .msg.ok { color: var(--ok); border-color: #b7ddc6; background: #eff9f1; }
-    .msg.bad { color: var(--bad); border-color: #edc3c0; background: #fff3f1; }
-    .msg.warn { color: var(--warn); border-color: #ead6ac; background: #fff9e9; }
-    .panel h2 { color: var(--ink); font-size: 13px; font-weight: 900; letter-spacing: .07em; text-transform: uppercase; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    td { padding: 7px 0; vertical-align: top; overflow-wrap: anywhere; }
-    td:first-child { width: 150px; padding-right: 14px; color: var(--muted); }
-    td:last-child { font: 12px/1.5 var(--mono); word-break: break-word; }
-    .hexwrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    table.hex { width: auto; min-width: 100%; font: 11px var(--mono); white-space: nowrap; }
-    table.hex th { padding: 0 16px 7px 0; text-align: left; color: var(--muted); font-size: 10px; text-transform: uppercase; border-bottom: 1px solid var(--line); }
-    table.hex td { width: auto; padding: 7px 16px 7px 0; border-bottom: 1px solid #eef1ec; color: var(--ink); }
-    .old { color: #bd3f3f; } .new { color: #19784c; } .dim { color: var(--muted); }
-    code { padding: 2px 5px; border-radius: 5px; background: var(--chip); font: 11px var(--mono); }
-
-    .finish-panel { margin-top: 0; padding: clamp(24px, 5vw, 36px); text-align: center; border: 1px solid var(--line); border-radius: 20px; background: #fff; }
-    .finish-panel h2 { margin: 13px 0 7px; color: var(--ink); font-size: 21px; letter-spacing: -.04em; text-transform: none; }
-    .finish-copy { max-width: 600px; margin: 0 auto 18px; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
-    .finish-icon, .finish-success { width: 50px; height: 50px; margin: 0 auto; display: grid; place-items: center; border-radius: 16px; background: var(--forest-soft); border: 1px solid #d8e2d6; }
-    .finish-success { color: var(--ok); background: #e9f7ec; border-color: #c2e4ca; font-size: 28px; font-weight: 900; }
-    .finish-spinner { width: 23px; height: 23px; border: 2px solid #e2e9e1; border-top-color: var(--accent); border-radius: 50%; animation: finishSpin .8s linear infinite; }
-    @keyframes finishSpin { to { transform: rotate(360deg); } }
-    .progress-track { height: 8px; overflow: hidden; margin: 18px 0 8px; border-radius: 99px; background: #edf0eb; }
-    .progress-fill { height: 100%; width: 0; border-radius: inherit; background: var(--accent); transition: width .08s linear; }
-    .progress-meta { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 11px; }
-    .progress-meta b { color: var(--forest); font-variant-numeric: tabular-nums; }
-    .download-main { width: 100%; max-width: 320px; margin: 5px auto 0; background: var(--accent); box-shadow: 0 5px 0 var(--accent-deep); }
-    .download-main:hover:not(:disabled) { background: #ff704e; box-shadow: 0 6px 0 var(--accent-deep); }
-    .continue-wrap { margin-top: 15px; }
-    .continue-small { min-height: 34px; padding: 8px 12px !important; color: var(--forest) !important; background: #f1f4ef !important; border: 1px solid var(--line) !important; box-shadow: none !important; font-size: 11px !important; }
-    .continue-small:hover:not(:disabled) { background: #e8eee6 !important; }
-    .site-footer { display: flex; justify-content: space-between; gap: 12px; margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--line); color: #88938b; font-size: 10px; letter-spacing: .04em; }
-
-    @media (max-width: 680px) {
-      body { padding: 13px 12px 36px; }
-      .topbar { align-items: flex-start; gap: 10px; margin-bottom: 18px; padding-bottom: 17px; }
-      .brand-lockup { gap: 10px; }
-      .brandmark { width: 48px; height: 48px; flex-basis: 48px; border-radius: 15px; }
-      .brand-eyebrow { font-size: 8px; letter-spacing: .13em; }
-      h1 { font-size: clamp(19px, 5vw, 24px); }
-      .brand-sub { font-size: 10px; }
-      .top-state { padding: 7px 8px; font-size: 8px; letter-spacing: .06em; }
-      .hero { grid-template-columns: minmax(0, 1fr) 78px; gap: 10px; padding: 23px 18px 26px; min-height: auto; border-radius: 22px; margin-bottom: 26px; }
-      .hero h2 { font-size: clamp(26px, 7vw, 36px); }
-      .hero p { font-size: 12px; }
-      .hero-tags { gap: 5px; margin-top: 14px; }
-      .hero-tags span { padding: 5px 7px; font-size: 9px; }
-      .hero-art { width: 74px; height: 74px; box-shadow: 4px 7px 0 rgba(36,59,50,.10); }
-      .hero-art::before { inset: 5px; }
-      .hero-art small { font-size: 6px; }
-      .hero-art strong { font-size: 31px; }
-      .hero-art span { font-size: 6px; }
-      .section { margin-bottom: 24px; }
-      .section-heading { display: block; }
-      .section-heading p { margin-top: 5px; text-align: left; }
-      #drop { padding: 20px 12px; min-height: 172px; border-radius: 18px; }
-      #dropText { min-height: 125px; }
-      .presets { grid-template-columns: minmax(0, 1fr); gap: 9px; }
-      .pre { padding: 14px 12px; border-radius: 14px; }
-      .panel, .guide { padding: 15px; border-radius: 15px; }
-      .cols { grid-template-columns: minmax(0, 1fr); gap: 12px; }
-      .flds { grid-template-columns: minmax(0, 1fr); }
-      .action-panel { align-items: stretch; flex-direction: column; gap: 14px; margin-top: 21px; padding: 17px; border-radius: 17px; }
-      #go { width: 100%; }
-      .site-footer { flex-direction: column; gap: 4px; }
-      td:first-child { width: 108px; padding-right: 10px; }
-    }
-    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F3F2EB">
+<title>nminh ios — Shader Lab</title>
+<style>
+:root{
+  color-scheme:light;
+  --bg:#F3F2EB;
+  --paper:#FFFFFF;
+  --ink:#20231D;
+  --muted:#777D70;
+  --line:#DFE3D7;
+  --acid:#D7FF4F;
+  --acid-dark:#29331A;
+  --coral:#FF725E;
+  --soft:#F7F8F1;
+  --shadow:0 18px 46px rgba(35,43,24,.08);
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{min-height:100%;background:var(--bg)}
+body{
+  margin:0;min-height:100vh;padding:17px 14px 54px;color:var(--ink);
+  font:15px/1.48 -apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;
+  background:radial-gradient(ellipse at 92% 3%,rgba(215,255,79,.22),transparent 28%),
+             radial-gradient(ellipse at 0% 37%,rgba(255,114,94,.09),transparent 27%),var(--bg);
+  -webkit-text-size-adjust:100%;
+}
+button,input{font:inherit}
+button{cursor:pointer}
+.wrap{width:100%;max-width:720px;margin:0 auto}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 2px 17px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.avatar-frame{width:54px;height:54px;padding:3px;flex:none;border-radius:18px;background:var(--acid);transform:rotate(-3deg);box-shadow:0 5px 0 rgba(32,35,29,.08)}
+.avatar{display:block;width:100%;height:100%;object-fit:cover;border-radius:15px;background:#e4e8d7;transform:rotate(3deg)}
+.brand-meta{min-width:0}
+.eyebrow{font-size:9px;letter-spacing:.19em;font-weight:900;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:1px}
+h1{margin:0;font-size:25px;letter-spacing:-.075em;font-weight:950;line-height:1.05}
+h1 span{color:#7A8D3D}
+.top-chip{background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:8px 11px;display:flex;align-items:center;gap:7px;font-size:10px;font-weight:850;letter-spacing:.08em;white-space:nowrap}
+.chip-dot{width:7px;height:7px;border-radius:50%;background:#97CB2D;box-shadow:0 0 0 4px rgba(151,203,45,.16)}
+.hero{position:relative;overflow:hidden;background:var(--ink);color:#fff;border-radius:28px;padding:24px 22px 20px;margin-bottom:19px;box-shadow:var(--shadow)}
+.hero:before{content:"";position:absolute;width:205px;height:205px;border-radius:50%;border:1px solid rgba(215,255,79,.35);right:-70px;top:-88px;box-shadow:0 0 0 20px rgba(215,255,79,.035),0 0 0 44px rgba(215,255,79,.025)}
+.hero:after{content:"N";position:absolute;right:14px;bottom:-54px;font-size:210px;font-weight:950;letter-spacing:-.16em;line-height:1;color:rgba(215,255,79,.08);pointer-events:none}
+.hero-kicker{position:relative;z-index:1;display:inline-flex;align-items:center;gap:8px;padding:6px 9px;background:rgba(215,255,79,.12);border:1px solid rgba(215,255,79,.3);border-radius:999px;color:var(--acid);font-size:9px;font-weight:900;letter-spacing:.15em}
+.hero-kicker i{display:block;width:6px;height:6px;border-radius:50%;background:var(--acid)}
+.hero h2{position:relative;z-index:1;max-width:440px;margin:17px 0 8px;font-size:clamp(29px,7vw,43px);line-height:1.03;letter-spacing:-.065em;font-weight:920}
+.hero h2 em{font-style:normal;color:var(--acid)}
+.hero p{position:relative;z-index:1;max-width:420px;font-size:13px;line-height:1.55;color:#C5C9BB;margin:0}
+.hero-steps{position:relative;z-index:1;display:flex;gap:7px;flex-wrap:wrap;margin-top:21px}
+.hero-steps span{border:1px solid rgba(255,255,255,.17);border-radius:9px;padding:7px 9px;color:#D6D9CE;font-size:9px;font-weight:800;letter-spacing:.06em}
+.section{background:rgba(255,255,255,.82);border:1px solid rgba(223,227,215,.9);border-radius:23px;padding:18px;margin-bottom:14px;box-shadow:0 7px 24px rgba(35,43,24,.025)}
+.section-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:15px}
+.step-no{display:grid;place-items:center;width:35px;height:35px;flex:none;background:var(--acid);border-radius:12px;font-size:12px;font-weight:950;letter-spacing:-.03em}
+.section-head h3{margin:0;font-size:17px;line-height:1.2;letter-spacing:-.035em;font-weight:900}
+.section-head p{margin:4px 0 0;color:var(--muted);font-size:12px;line-height:1.45}
+#drop{display:flex;align-items:center;justify-content:center;min-height:126px;padding:17px;text-align:center;cursor:pointer;border:1.5px dashed #C6CEB7;border-radius:18px;background:#FBFCF6;transition:border-color .18s,background .18s,transform .18s}
+#drop:hover,#drop.over{border-color:#A2C43E;background:#F3F9E2}
+#drop.has{border-style:solid;border-color:#D8E5B5;background:#F8FBEF}
+#dropText{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0;width:100%}
+.upload-symbol{width:36px;height:36px;display:grid;place-items:center;border-radius:12px;background:var(--acid);color:var(--ink);font-size:19px;font-weight:900;margin-bottom:3px}
+#drop b{display:block;max-width:100%;font-size:14px;line-height:1.35;font-weight:850;overflow-wrap:anywhere}
+#drop span{display:block;color:var(--muted);font-size:11px;max-width:100%;overflow-wrap:anywhere}
+#file{display:none}
+.status{display:flex;align-items:flex-start;gap:10px;border-radius:14px;padding:12px 14px;margin:0 0 14px;font-size:12px;line-height:1.45;background:#fff;border:1px solid var(--line)}
+.status.ready{background:#F4F9E5;border-color:#DCE8BA}
+.status.loading{background:#FFFDF4;border-color:#E9E3C9}
+.status.error{display:block;background:#FFF1EC;border-color:#F4C8BA;color:#803E31}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#8EB92C;flex:none;margin-top:4px;box-shadow:0 0 0 4px rgba(142,185,44,.13)}
+.status b{display:block;color:var(--ink);font-size:12px}
+.status-sub{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.status-tag{margin-left:auto;background:var(--acid);padding:3px 7px;border-radius:7px;font-size:9px;font-weight:900;letter-spacing:.08em;color:var(--acid-dark)}
+.presets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-bottom:14px}
+.pre{position:relative;display:flex;flex-direction:column;gap:13px;min-height:154px;padding:15px;border:1.5px solid var(--line);border-radius:19px;cursor:pointer;background:var(--paper);transition:transform .15s,border-color .15s,background .15s;box-shadow:0 5px 15px rgba(35,43,24,.025)}
+.pre:hover{transform:translateY(-2px);border-color:#B7C78B}
+.pre.sel{background:#F5F9E9;border-color:#9FC13C;box-shadow:inset 0 0 0 1px #9FC13C}
+.pre input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
+.pre-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pre-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:14px;background:#F1F3EA;font-size:20px}
+.pre.sel .pre-icon{background:var(--acid)}
+.radio-mark{width:19px;height:19px;border:1.5px solid #C7CDBE;border-radius:50%;position:relative;flex:none}
+.pre.sel .radio-mark{border-color:#5B771E;background:#5B771E}
+.pre.sel .radio-mark:after{content:"";position:absolute;inset:5px;border-radius:50%;background:white}
+.pre .t{font-size:14px;font-weight:900;letter-spacing:-.03em;line-height:1.25;margin-bottom:5px}
+.pre .d{font-size:11px;line-height:1.45;color:var(--muted)}
+.pre .n{font-size:9px;font-family:var(--mono);font-weight:700;letter-spacing:.02em;color:#7C873E;overflow-wrap:anywhere}
+.off{display:none!important}
+.panel{background:#fff;border:1px solid var(--line);border-radius:23px;padding:18px;margin:0 0 14px;box-shadow:var(--shadow)}
+.panel-title{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
+.panel-title h3{font-size:18px;line-height:1.2;font-weight:950;letter-spacing:-.04em;margin:0}
+.panel-title p{font-size:11px;color:var(--muted);margin:5px 0 0;line-height:1.5}
+.panel-pill{flex:none;padding:6px 8px;border-radius:8px;background:var(--acid);font-size:9px;font-weight:900;letter-spacing:.08em}
+.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.cfld{padding:11px;background:#F8F9F4;border:1px solid #E9ECE3;border-radius:15px;min-width:0}
+.cfld label{display:block;font-size:11px;font-weight:850;color:#42483A;margin-bottom:9px}
+.cfld label .dim{display:block;font-weight:500;color:var(--muted);font-family:var(--mono);font-size:9px;margin-top:2px}
+.crow{display:flex;align-items:center;gap:7px}
+.crow input[type=color]{width:39px;height:37px;padding:3px;border:1px solid #DDE2D4;border-radius:11px;background:#fff;cursor:pointer;flex:none}
+.crow input[type=text]{width:100%;min-width:0;padding:9px 7px;border:1px solid #E0E4D9;border-radius:9px;background:white;color:var(--ink);font:11px var(--mono);text-transform:uppercase;outline:none}
+.crow input[type=text]:focus{border-color:#9FC13C;box-shadow:0 0 0 3px rgba(159,193,60,.15)}
+.crow input[type=text].bad{border-color:var(--coral)}
+.wfld,.afld{margin-top:17px;padding:12px 13px;border-radius:14px;background:#F8F9F4;border:1px solid #E9ECE3}
+.wfld label,.afld label{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11px;font-weight:800;color:#42483A;margin-bottom:9px}
+.wfld label .dim,.afld label .dim{color:var(--muted);font-family:var(--mono);font-size:10px}
+.wfld label b,.afld label b{font-family:var(--mono);font-size:11px;background:var(--acid);padding:3px 7px;border-radius:7px;color:var(--ink)}
+input[type=range]{width:100%;margin:0;accent-color:#7D9F2C;cursor:pointer}
+.fxrow{display:grid;grid-template-columns:1fr;gap:9px;margin-top:15px}
+.chk{display:flex;align-items:center;gap:10px;padding:12px;border-radius:13px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:12px;font-weight:800}
+.chk input{width:17px;height:17px;margin:0;accent-color:#91B932;flex:none}
+.chk .dim{display:block;color:var(--muted);font-size:10px;font-weight:500;margin-top:2px}
+.note{font-size:10px;line-height:1.5;color:var(--muted);margin-top:12px}
+.action-wrap{padding:0 1px;margin:16px 0 14px}
+#go{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;border-radius:17px;padding:16px 17px 16px 19px;background:var(--acid);color:var(--ink);font-size:14px;font-weight:950;box-shadow:0 6px 0 #AFCF3E,0 13px 25px rgba(65,82,30,.10);transition:transform .15s,filter .15s}
+#go:hover:not(:disabled){filter:saturate(1.12);transform:translateY(-1px)}
+#go:active:not(:disabled){transform:translateY(3px);box-shadow:0 3px 0 #AFCF3E}
+#go:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+.go-arrow{display:grid;place-items:center;width:29px;height:29px;border-radius:10px;background:var(--ink);color:var(--acid);font-size:17px}
+.complete-card{background:#20231D;color:white;border-radius:22px;padding:17px;margin:14px 0;box-shadow:var(--shadow)}
+.complete-mark{display:grid;place-items:center;width:39px;height:39px;border-radius:13px;background:var(--acid);color:var(--ink);font-size:22px;font-weight:950;margin-bottom:14px}
+.complete-kicker{font-size:9px;letter-spacing:.16em;font-weight:900;color:var(--acid)}
+.complete-copy h3{font-size:21px;letter-spacing:-.045em;line-height:1.2;margin:5px 0 6px;font-weight:950}
+.complete-copy p{font-size:12px;color:#C7CCBE;margin:0;line-height:1.5}
+.save-btn{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;margin-top:17px;padding:13px 14px;border:0;border-radius:13px;background:var(--acid);color:var(--ink);font-size:12px;font-weight:950}
+.save-btn span:last-child{font-size:18px}
+.footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 4px 0;color:#858B7A;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.footer-brand{display:flex;align-items:center;gap:6px;color:#555D47}
+.footer-brand span{display:inline-block;width:6px;height:6px;border-radius:2px;background:var(--coral);transform:rotate(45deg)}
+@media(max-width:430px){
+ body{padding:13px 11px 40px}
+ .topbar{margin-bottom:13px}.avatar-frame{width:48px;height:48px;border-radius:16px}
+ h1{font-size:23px}.top-chip{font-size:8px;padding:7px 8px}
+ .hero{border-radius:23px;padding:21px 17px 17px;margin-bottom:14px}
+ .hero h2{font-size:32px}.hero-steps span{font-size:8px}
+ .section{padding:14px;border-radius:20px}
+ .presets{gap:8px}.pre{padding:12px;min-height:158px;border-radius:16px;gap:11px}
+ .pre-icon{width:35px;height:35px;border-radius:12px;font-size:18px}
+ .pre .t{font-size:12px}.pre .d{font-size:10px}.pre .n{font-size:8px}
+ .panel{padding:14px;border-radius:20px}.cols{gap:8px}.cfld{padding:9px}
+ .crow{gap:5px}.crow input[type=color]{width:34px;height:35px}.crow input[type=text]{font-size:10px;padding:8px 5px}
+ .footer{font-size:8px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
 </head>
 <body>
-  <div class="app-shell">
-    <header class="topbar">
-      <div class="brand-lockup">
-        <div class="brandmark"><img src="https://cdn.upanhlaylink.com/i/TLOGJDhT.png" alt="Avatar NMINHIOS" loading="eager" onerror="this.hidden=true;this.parentElement.classList.add('avatar-fallback')"></div>
-        <div class="brand-copy">
-          <div class="brand-eyebrow">NMINHIOS · CREATOR TOOLS</div>
-          <h1>NMINHIOS <span>ASSET LAB</span></h1>
-          <p class="brand-sub">Không gian tùy chỉnh bundle · Tối ưu cho điện thoại</p>
-        </div>
+<div class="wrap">
+  <header class="topbar">
+    <div class="brand">
+      <div class="avatar-frame"><img class="avatar" src="https://cdn.upanhlaylink.com/i/TLOGJDhT.png" alt="nminh ios" referrerpolicy="no-referrer"></div>
+      <div class="brand-meta"><span class="eyebrow">PERSONAL SHADER TOOL</span><h1>nminh <span>ios</span></h1></div>
+    </div>
+    <div class="top-chip"><span class="chip-dot"></span> SHADER LAB</div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-kicker"><i></i> CUSTOM LOOK · YOUR STYLE</div>
+    <h2>Màu sắc theo<br><em>chất riêng.</em></h2>
+    <p>Chọn file, chọn chức năng, phối màu theo ý bạn. Giao diện tối giản để thao tác nhanh trên điện thoại.</p>
+    <div class="hero-steps"><span>01 / CHỌN FILE</span><span>02 / TÙY CHỈNH</span><span>03 / LƯU KẾT QUẢ</span></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="step-no">01</span>
+      <div><h3>Chọn file nguồn</h3><p>Chỉ hỗ trợ hai loại shader bên dưới.</p></div>
+    </div>
+    <div id="drop">
+      <div id="dropText"><span class="upload-symbol">↑</span><b>Chạm để chọn file</b><span>shaders hoặc optionalavatarres_commonab_shader</span></div>
+      <input type="file" id="file" class="hide" accept="*/*">
+    </div>
+  </section>
+
+  <div id="info"></div>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="step-no">02</span>
+      <div><h3>Chọn chức năng</h3><p>Các lựa chọn sẽ mở theo loại file bạn đã chọn.</p></div>
+    </div>
+    <div class="presets" id="presets">
+      <label class="pre off">
+        <input type="radio" name="p" value="3">
+        <div class="pre-top"><span class="pre-icon">◈</span><span class="radio-mark"></span></div>
+        <div><div class="t">Shader súng</div><div class="d">Tùy chỉnh màu súng, màu viền, màu keo và độ đậm.</div></div>
+        <div class="n">SHADERS</div>
+      </label>
+      <label class="pre off">
+        <input type="radio" name="p" value="4">
+        <div class="pre-top"><span class="pre-icon">✳</span><span class="radio-mark"></span></div>
+        <div><div class="t">Shader nhân vật</div><div class="d">Phối màu nhân vật, ánh sáng viền và hiệu ứng hiển thị.</div></div>
+        <div class="n">OPTIONAL AVATAR</div>
+      </label>
+    </div>
+
+    <section class="panel adv off" id="colBox">
+      <div class="panel-title"><div><h3>Màu sắc súng</h3><p>Chọn màu và chỉnh cường độ theo sở thích.</p></div><span class="panel-pill">COLOR 01</span></div>
+      <div class="cols">
+        <div class="cfld"><label>Màu súng <span class="dim">Màu chính</span></label><div class="crow"><input type="color" id="cXray" value="#111111"><input type="text" id="tXray" value="#111111" spellcheck="false" aria-label="Mã màu súng"></div></div>
+        <div class="cfld"><label>Màu viền <span class="dim">Viền nổi bật</span></label><div class="crow"><input type="color" id="cLine" value="#ffffff"><input type="text" id="tLine" value="#FFFFFF" spellcheck="false" aria-label="Mã màu viền"></div></div>
+        <div class="cfld"><label>Màu keo <span class="dim">Màu phụ</span></label><div class="crow"><input type="color" id="cDim" value="#111111"><input type="text" id="tDim" value="#111111" spellcheck="false" aria-label="Mã màu keo"></div></div>
       </div>
-      <div class="top-state"><span class="state-dot"></span> LOCAL WORKSPACE</div>
-    </header>
+      <div class="wfld"><label><span>Độ dày viền</span><b id="wVal">4.0</b></label><input type="range" id="rWidth" min="0" max="20" step="0.5" value="4"></div>
+      <div class="afld"><label><span>Độ đậm màu súng</span><b id="aVal">1.00</b></label><input type="range" id="rAlpha" min="0" max="1" step="0.05" value="1"></div>
+    </section>
 
-    <main>
-      <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-copy">
-          <div class="hero-kicker">FILE WORKSHOP / 2026</div>
-          <h2 id="hero-title">Chọn tệp.<br>Thiết lập <span>cách riêng.</span></h2>
-          <p>Nạp bundle cần chỉnh sửa, chọn tác vụ phù hợp và xuất tệp ngay trong giao diện này.</p>
-          <div class="hero-tags"><span>01 · Import</span><span>02 · Customize</span><span>03 · Export</span></div>
-        </div>
-        <div class="hero-art" aria-hidden="true"><small>NMINH</small><strong>01</strong><span>ASSET LAB</span></div>
-      </section>
+    <section class="panel adv off" id="holoBox">
+      <div class="panel-title"><div><h3>Màu sắc nhân vật</h3><p>Tạo tông màu riêng và bật/tắt các hiệu ứng.</p></div><span class="panel-pill">COLOR 02</span></div>
+      <div class="cols">
+        <div class="cfld"><label>Màu nhân vật <span class="dim">Màu toàn thân</span></label><div class="crow"><input type="color" id="cTint" value="#00ffff"><input type="text" id="tTint" value="#00FFFF" spellcheck="false" aria-label="Mã màu nhân vật"></div></div>
+        <div class="cfld"><label>Màu sáng mép <span class="dim">Ánh sáng viền</span></label><div class="crow"><input type="color" id="cRim" value="#00ffff"><input type="text" id="tRim" value="#00FFFF" spellcheck="false" aria-label="Mã màu sáng mép"></div></div>
+        <div class="cfld"><label>Màu quét <span class="dim">Hiệu ứng quét</span></label><div class="crow"><input type="color" id="cScan" value="#000000"><input type="text" id="tScan" value="#000000" spellcheck="false" aria-label="Mã màu quét"></div></div>
+      </div>
+      <div class="afld"><label><span>Độ đậm nhân vật</span><b id="tintAVal">1.00</b></label><input type="range" id="rTintA" min="0" max="1" step="0.05" value="1"></div>
+      <div class="afld"><label><span>Cường độ sáng mép</span><b id="rimAVal">1.00</b></label><input type="range" id="rRimA" min="0" max="1" step="0.05" value="1"></div>
+      <div class="afld"><label><span>Cường độ quét</span><b id="scanAVal">1.00</b></label><input type="range" id="rScanA" min="0" max="1" step="0.05" value="1"></div>
+      <div class="fxrow">
+        <label class="chk"><input type="checkbox" id="kXray" checked><span>Hiển thị xuyên vật cản<span class="dim">Bật hoặc tắt hiệu ứng hiển thị</span></span></label>
+        <label class="chk"><input type="checkbox" id="kLine"><span>Đường quét ngang<span class="dim">Thêm dải quét trên nhân vật</span></span></label>
+        <label class="chk"><input type="checkbox" id="kGlitch"><span>Hiệu ứng nhiễu<span class="dim">Bật hoặc tắt hiệu ứng glitch</span></span></label>
+      </div>
+    </section>
+  </section>
 
-      <section class="section" aria-labelledby="upload-title">
-        <div class="section-heading">
-          <div><div class="step-label">BƯỚC 01 / SOURCE</div><h2 id="upload-title">Chọn tệp nguồn</h2></div>
-          <p>Chọn tệp từ thiết bị hoặc kéo tệp vào vùng bên dưới.</p>
-        </div>
-        <div id="drop" role="button" tabindex="0" aria-label="Chọn tệp nguồn">
-          <div id="dropText">
-            <b>Thả tệp vào khu vực này</b>
-            <span>Hoặc chạm để duyệt tệp trên thiết bị</span>
-            <span>Định dạng thường gặp:</span>
-            <div><code>assetindexer</code><code>shaders</code><code>optionalavatarres_commonab_shader</code></div>
-          </div>
-          <input type="file" id="file" class="hide" aria-label="Chọn tệp">
-        </div>
-        <div id="info" aria-live="polite"></div>
-      </section>
-
-      <section class="section" aria-labelledby="preset-title">
-        <div class="section-heading">
-          <div><div class="step-label">BƯỚC 02 / CONFIGURE</div><h2 id="preset-title">Chọn tác vụ</h2></div>
-          <p>Các lựa chọn sẽ tự bật theo loại bundle mà công cụ nhận diện được.</p>
-        </div>
-        <div class="presets" id="presets">
-          <label class="pre off">
-            <input type="radio" name="p" value="1">
-            <span class="preset-code">01</span>
-            <span class="pre-copy"><span class="t">Aim Head</span><span class="d">Áp dụng cấu hình có sẵn cho bundle UMA.</span></span>
-            <span class="preset-arrow">↗</span>
-          </label>
-          <label class="pre off">
-            <input type="radio" name="p" value="2">
-            <span class="preset-code">02</span>
-            <span class="pre-copy"><span class="t">AimDrag USP</span><span class="d">Tinh chỉnh vị trí và thông số theo cấu hình.</span></span>
-            <span class="preset-arrow">↗</span>
-          </label>
-          <label class="pre off">
-            <input type="radio" name="p" value="3">
-            <span class="preset-code">03</span>
-            <span class="pre-copy"><span class="t">Hiệu ứng vũ khí</span><span class="d">Chọn màu, độ dày viền và độ đục hiệu ứng.</span></span>
-            <span class="preset-arrow">↗</span>
-          </label>
-          <label class="pre off">
-            <input type="radio" name="p" value="4">
-            <span class="preset-code">04</span>
-            <span class="pre-copy"><span class="t">Hiệu ứng nhân vật</span><span class="d">Điều chỉnh màu, ánh sáng mép và hiệu ứng quét.</span></span>
-            <span class="preset-arrow">↗</span>
-          </label>
-          <label class="pre off">
-            <input type="radio" name="p" value="5">
-            <span class="preset-code">05</span>
-            <span class="pre-copy"><span class="t">Antena</span><span class="d">Áp dụng thay đổi tương ứng nếu bundle được hỗ trợ.</span></span>
-            <span class="preset-arrow">↗</span>
-          </label>
-        </div>
-
-        <details class="panel adv off" id="colBox">
-          <summary>Điều chỉnh màu · Hiệu ứng vũ khí</summary>
-          <div class="cols">
-            <div class="cfld"><label for="cXray">Màu súng</label><div class="crow"><input type="color" id="cXray" value="#111111"><input type="text" id="tXray" value="#111111" spellcheck="false"></div></div>
-            <div class="cfld"><label for="cLine">Màu viền súng</label><div class="crow"><input type="color" id="cLine" value="#ffffff"><input type="text" id="tLine" value="#FFFFFF" spellcheck="false"></div></div>
-            <div class="cfld"><label for="cDim">Màu keo</label><div class="crow"><input type="color" id="cDim" value="#111111"><input type="text" id="tDim" value="#111111" spellcheck="false"></div></div>
-          </div>
-          <div class="wfld"><label>Độ dày viền — <b id="wVal">4.0</b></label><input type="range" id="rWidth" min="0" max="20" step="0.5" value="4"></div>
-          <div class="afld"><label>Độ đục màu súng — <b id="aVal">1.00</b></label><input type="range" id="rAlpha" min="0" max="1" step="0.05" value="1"></div>
-        </details>
-
-        <details class="panel adv off" id="holoBox">
-          <summary>Điều chỉnh màu · Hiệu ứng nhân vật</summary>
-          <div class="cols">
-            <div class="cfld"><label for="cTint">Màu nhân vật</label><div class="crow"><input type="color" id="cTint" value="#00ffff"><input type="text" id="tTint" value="#00FFFF" spellcheck="false"></div></div>
-            <div class="cfld"><label for="cRim">Màu sáng mép</label><div class="crow"><input type="color" id="cRim" value="#00ffff"><input type="text" id="tRim" value="#00FFFF" spellcheck="false"></div></div>
-            <div class="cfld"><label for="cScan">Màu quét</label><div class="crow"><input type="color" id="cScan" value="#000000"><input type="text" id="tScan" value="#000000" spellcheck="false"></div></div>
-          </div>
-          <div class="afld"><label>Độ đục nhân vật — <b id="tintAVal">1.00</b></label><input type="range" id="rTintA" min="0" max="1" step="0.05" value="1"></div>
-          <div class="afld"><label>Độ mạnh sáng mép — <b id="rimAVal">1.00</b></label><input type="range" id="rRimA" min="0" max="1" step="0.05" value="1"></div>
-          <div class="afld"><label>Độ mạnh quét — <b id="scanAVal">1.00</b></label><input type="range" id="rScanA" min="0" max="1" step="0.05" value="1"></div>
-          <div class="fxrow">
-            <label class="chk"><input type="checkbox" id="kXray" checked><span>Xuyên tường</span></label>
-            <label class="chk"><input type="checkbox" id="kLine"><span>Đường quét ngang</span></label>
-            <label class="chk"><input type="checkbox" id="kGlitch"><span>Nhiễu / giật</span></label>
-          </div>
-        </details>
-
-        <details class="panel adv off" id="advBox">
-          <summary>Tinh chỉnh vị trí · AimDrag USP</summary>
-          <div class="flds">
-            <div class="fld"><label for="fx">Nữ · position.x</label><input id="fx" value="-0.23"></div>
-            <div class="fld"><label for="fz">Nữ · position.z</label><input id="fz" value="-0.01"></div>
-            <div class="fld"><label for="mx">Nam · position.x</label><input id="mx" value="-0.3133402466773987"></div>
-            <div class="fld"><label for="sc">scale (x âm)</label><input id="sc" value="1.5555556"></div>
-          </div>
-        </details>
-      </section>
-
-      <section class="action-panel" aria-labelledby="export-title">
-        <div class="action-copy"><div class="step-label">BƯỚC 03 / EXPORT</div><h2 id="export-title">Tạo tệp mới</h2><p>Tệp chỉ được xuất sau khi công cụ kiểm tra và xử lý thành công.</p></div>
-        <div class="row"><button id="go" disabled type="button">Tạo file</button></div>
-      </section>
-      <div id="out" aria-live="polite"></div>
-    </main>
-
-    <footer class="site-footer"><span>NMINHIOS ASSET LAB</span><span>Giao diện được thiết kế lại · Mobile friendly</span></footer>
-  </div>
-  <script>
-
+  <div class="action-wrap"><button id="go" disabled><span>Áp dụng tuỳ chỉnh</span><span class="go-arrow" aria-hidden="true">↗</span></button></div>
+  <div id="out"></div>
+  <footer class="footer"><span class="footer-brand"><span></span> nminh ios</span><span>Simple · Clean · Custom</span></footer>
+</div>
+</body>
+<script>
 /* ═══════════ tiện ích ═══════════ */
 const $ = s => document.querySelector(s);
 const hx = n => n.toString(16);
 const esc = s => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 const a4 = n => (n + 3) & ~3;
-
-const CRC_TAB = (() => {
-  const t = new Uint32Array(256);
-  for (let n = 0; n < 256; n++){
-    let c = n;
-    for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
-    t[n] = c >>> 0;
-  }
-  return t;
-})();
-const crc32 = b => {
-  let c = 0xFFFFFFFF;
-  for (let i = 0; i < b.length; i++) c = CRC_TAB[(c ^ b[i]) & 0xFF] ^ (c >>> 8);
-  return (c ^ 0xFFFFFFFF) >>> 0;
-};
-const enc = s => new TextEncoder().encode(s);
 
 /* ═══════════ LZ4 ═══════════ */
 function lz4dec(src, outSize){
@@ -731,401 +597,7 @@ function readObj(sf, o, trace){
   return v;
 }
 
-/* ═══════════ PRESET 1: tráo bone_Hips ⇄ bone_Neck ═══════════ */
-const HIPS = enc('bone_Hips'), NECK = enc('bone_Neck');
-const H_HIPS = crc32(HIPS), H_NECK = crc32(NECK);
-
-function findSwapTargets(u8, from, to){
-  const hits = [];
-  const want = [
-    { nm: HIPS, lb:'bone_Hips', h: H_HIPS, ot: NECK, ol:'bone_Neck', cons:true  },
-    { nm: NECK, lb:'bone_Neck', h: H_NECK, ot: HIPS, ol:'bone_Hips', cons:true  },
-    { nm: HIPS, lb:'bone_Hips', h: H_NECK, ot: NECK, ol:'bone_Neck', cons:false },
-    { nm: NECK, lb:'bone_Neck', h: H_HIPS, ot: HIPS, ol:'bone_Hips', cons:false }
-  ];
-  for (const w of want){
-    const pat = new Uint8Array(20);
-    const pv = new DataView(pat.buffer);
-    pv.setInt32(0, 9, true);
-    pat.set(w.nm, 4);
-    pv.setUint32(16, w.h, true);
-    for (let i = from; i <= to - 20; i++){
-      let ok = true;
-      for (let k = 0; k < 20; k++) if (u8[i+k] !== pat[k]) { ok = false; break; }
-      if (ok) hits.push({ at: i + 4, ...w });
-    }
-  }
-  return hits.sort((a,b) => a.at - b.at);
-}
-
-function applyPreset1(orig, b){
-  const node = b.nodes[0];
-  if (b.blocks.some(x => (x.f & 0x3F) !== 0))
-    throw new Error('Bundle có block bị nén — preset 1 chỉ sửa được bundle lưu thô.');
-  const from = b.dataStart + node.off, to = from + node.size;
-  const hits = findSwapTargets(orig, from, to);
-  if (!hits.length) throw new Error('Không tìm thấy cặp bone_Hips / bone_Neck nào trong file này.');
-  const out = orig.slice();
-  for (const h of hits) out.set(h.ot, h.at);
-  const rows = hits.map(h => [`0x${hx(h.at).padStart(5,'0')}`, String(h.h), h.lb, h.ol]);
-  const st = hits.every(h => h.cons) ? 'nguyên bản'
-           : hits.every(h => !h.cons) ? 'đã hoán đổi' : 'lẫn lộn';
-  return {
-    out,
-    note: `Tìm thấy <b>${hits.length}</b> mục tiêu (trạng thái trước đó: <b>${st}</b>) — hoán đổi ${hits.length*4} byte.`,
-    cols: ['Offset','Hash (CRC32)','Trước','Sau'], rows
-  };
-}
-
-/* ═══════════ PRESET 2: bone_Head giả + indexer 12 mục ═══════════ */
-const MALE_PID = -9165109095992080675n, FEMALE_PID = 2680591970127643204n;
-const BACKPACK = 'bone_Left_Spine_Backpack';
-
-/* Sửa một mesh: đổi tên xương Backpack → bone_Head, đặt position + scale */
-function patchMesh(sf, o, px, pz, s){
-  const trace = [];
-  const val = readObj(sf, o, trace);
-  const bones = val.meshData.umaBones;
-  const names = trace.filter(t => t.node === 'name');
-  if (names.length !== bones.length) throw new Error('Không khớp số xương với chuỗi tên.');
-
-  const idx = bones.findIndex(b => b.name === BACKPACK);
-  if (idx < 0) return null;                       // mesh này không có
-  const tr = names[idx];
-
-  const body = objBody(sf, o);
-  const posOff = tr.start - 40;                   // position(12) rotation(16) scale(12) name
-  const scOff  = tr.start - 12;
-
-  const oldFieldLen = 4 + tr.len + ((-(4 + tr.len)) & 3);
-  const nb = enc('bone_Head');
-  const newField = new Uint8Array(4 + nb.length + ((-(4 + nb.length)) & 3));
-  new DataView(newField.buffer).setInt32(0, nb.length, true);
-  newField.set(nb, 4);
-
-  const out = new Uint8Array(body.length - oldFieldLen + newField.length);
-  out.set(body.subarray(0, tr.start), 0);
-  out.set(newField, tr.start);
-  out.set(body.subarray(tr.start + oldFieldLen), tr.start + newField.length);
-
-  const odv = new DataView(out.buffer);
-  const before = { x: bones[idx].position.x, y: bones[idx].position.y, z: bones[idx].position.z,
-                   sx: bones[idx].scale.x, sy: bones[idx].scale.y, sz: bones[idx].scale.z };
-  if (px !== null) odv.setFloat32(posOff, px, true);
-  if (pz !== null) odv.setFloat32(posOff + 8, pz, true);
-  odv.setFloat32(scOff,     -s, true);
-  odv.setFloat32(scOff + 4,  s, true);
-  odv.setFloat32(scOff + 8,  1.0, true);
-
-  return { body: out, idx, before,
-           after: { x: px ?? before.x, y: before.y, z: pz ?? before.z, sx: -s, sy: s, sz: 1.0 } };
-}
-
-/* Ghi một chuỗi Unity: [int32 độ dài][bytes][đệm căn 4] */
-function wstr(s){
-  const sb = enc(s);
-  const f = new Uint8Array(a4(4 + sb.length));
-  new DataView(f.buffer).setInt32(0, sb.length, true);
-  f.set(sb, 4);
-  return f;
-}
-
-/*
-  Dựng lại UMAAssetIndexer:
-   - Thêm mọi recipe/race có trong bundle mà indexer chưa liệt kê (4 mục _max).
-   - Rút gọn _Path để tổng kích thước object khớp đúng `targetSize`,
-     nhờ đó dung lượng file cuối bằng đúng bản gốc.
-  _Name / _TypeIndex / m_Item (PPtr) giữ nguyên tuyệt đối — runtime chỉ dùng chúng.
-*/
-function rebuildIndexer(sf, o, known, targetSize){
-  const trace = [];
-  const val = readObj(sf, o, trace);
-  const items = val.Items;
-  const paths = trace.filter(t => t.node === '_Path');
-  if (paths.length !== items.length) throw new Error('Không khớp số _Path với số mục indexer.');
-
-  /* mục hiện có + mục còn thiếu (đối chiếu theo pathID của object trong bundle) */
-  const have = new Set(items.map(it => it.m_Item.m_PathID));
-  const added = [];
-  for (const k of known){
-    if (have.has(k.pid)) continue;
-    const sib = items.find(it => it._TypeIndex === k.typeIndex);
-    added.push({
-      _QualifiedName: '', _TypeIndex: k.typeIndex, _Name: k.name,
-      m_Item: { m_FileID: 0, m_PathID: k.pid },
-      _Path: sib ? sib._Path.replace(/[^/]+\.asset$/, k.name + '.asset') : k.name + '.asset'
-    });
-  }
-  const all = [...items, ...added].sort((a,b) => a._Name < b._Name ? -1 : a._Name > b._Name ? 1 : 0);
-
-  /* head = mọi thứ trước mảng Items (int32 số mục nằm ngay trước _QualifiedName đầu tiên) */
-  const firstQN = trace.find(t => t.node === '_QualifiedName');
-  if (!firstQN) throw new Error('Indexer không có mục nào để tham chiếu bố cục.');
-  const body0 = objBody(sf, o);
-  const head = body0.subarray(0, firstQN.start - 4);
-  const fixed = all.reduce((acc, it) =>
-    acc + a4(4 + enc(it._QualifiedName).length) + 4 + a4(4 + enc(it._Name).length) + 12, 0);
-  const budget = targetSize - head.length - 4 - fixed - 24;    // 4 = size mảng, 24 = 2 PPtr cuối
-  if (budget < all.length * 4)
-    throw new Error(`Không đủ chỗ cho ${all.length} mục (_Path cần tối thiểu ${all.length*4} B, còn ${budget} B).`);
-
-  /* rút gọn _Path: bắt đầu từ tên file, nối dần thư mục cha cho đến sát ngân sách */
-  const cur = all.map(it => it._Path.split('/').pop());
-  const total = () => cur.reduce((a,p) => a + a4(4 + enc(p).length), 0);
-  if (total() > budget) throw new Error('Không đủ chỗ cho _Path ngay cả khi chỉ giữ tên file.');
-  for (let k = 0; k < all.length; k++){
-    const parts = all[k]._Path.split('/');
-    for (let d = 2; d <= parts.length; d++){
-      const old = cur[k];
-      cur[k] = parts.slice(-d).join('/');
-      if (total() > budget){ cur[k] = old; break; }
-    }
-  }
-  /* phần dư còn lại: nới thêm thư mục cha cho mục nào vừa khít, không chèn ký tự rác */
-  let guard = 0;
-  while (total() < budget && guard++ < 2000){
-    let done = true;
-    for (let k = 0; k < all.length; k++){
-      const parts = all[k]._Path.split('/');
-      const depth = cur[k].split('/').length;
-      if (depth >= parts.length) continue;
-      const old = cur[k];
-      cur[k] = parts.slice(-(depth + 1)).join('/');
-      if (total() > budget){ cur[k] = old; } else { done = false; break; }
-    }
-    if (done) break;
-  }
-  /* nếu vẫn thiếu vài byte, đệm bằng './' ở đầu một đường dẫn (vẫn là path hợp lệ) */
-  guard = 0;
-  while (total() < budget && guard++ < 500){
-    let j = 0;
-    for (let k = 1; k < cur.length; k++) if (cur[k].length < cur[j].length) j = k;
-    cur[j] = './' + cur[j];
-  }
-  if (total() !== budget)
-    throw new Error(`Không khớp ngân sách _Path (${total()} ≠ ${budget}).`);
-
-  /* ghi lại object */
-  const parts = [head];
-  const cnt = new Uint8Array(4);
-  new DataView(cnt.buffer).setInt32(0, all.length, true);
-  parts.push(cnt);
-  for (let k = 0; k < all.length; k++){
-    const it = all[k];
-    parts.push(wstr(it._QualifiedName));
-    const ti = new Uint8Array(4);
-    new DataView(ti.buffer).setInt32(0, it._TypeIndex, true);
-    parts.push(ti);
-    parts.push(wstr(it._Name));
-    const pp = new Uint8Array(12);
-    const pv = new DataView(pp.buffer);
-    pv.setInt32(0, it.m_Item.m_FileID, true);
-    pv.setBigInt64(4, it.m_Item.m_PathID, true);
-    parts.push(pp);
-    parts.push(wstr(cur[k]));
-  }
-  const tail = new Uint8Array(24);
-  const tv = new DataView(tail.buffer);
-  tv.setInt32(0, val.BaseMaleBone.m_FileID, true);
-  tv.setBigInt64(4, val.BaseMaleBone.m_PathID, true);
-  tv.setInt32(12, val.BaseFemaleBone.m_FileID, true);
-  tv.setBigInt64(16, val.BaseFemaleBone.m_PathID, true);
-  parts.push(tail);
-
-  const len = parts.reduce((a,x) => a + x.length, 0);
-  if (len !== targetSize) throw new Error(`Indexer dựng ra ${len} B, cần ${targetSize} B.`);
-  const out = new Uint8Array(len);
-  let w = 0;
-  for (const x of parts){ out.set(x, w); w += x.length; }
-  return { body: out, names: all.map(i => i._Name), paths: cur, addedCount: added.length };
-}
-
-/* Dựng lại CAB với các object đã thay */
-function rebuildCab(sf, repl){
-  const old = sf.cab.subarray(sf.dataOffset);
-  const order = [...sf.objs].sort((a,b) => a.off - b.off);
-  const chunks = [];
-  const newOff = new Map();
-  let prevEnd = 0, cursor = 0;
-  for (const o of order){
-    const gap = old.subarray(prevEnd, o.off);
-    chunks.push(gap); cursor += gap.length;
-    const body = repl.get(o.pid) ?? old.subarray(o.off, o.off + o.size);
-    newOff.set(o.pid, cursor);
-    chunks.push(body); cursor += body.length;
-    prevEnd = o.off + o.size;
-  }
-  const tail = old.subarray(prevEnd);
-  chunks.push(tail); cursor += tail.length;
-
-  const data = new Uint8Array(cursor);
-  let w = 0;
-  for (const c of chunks){ data.set(c, w); w += c.length; }
-
-  const meta = sf.cab.slice(0, sf.dataOffset);
-  const mdv = new DataView(meta.buffer);
-  for (const o of sf.objs){
-    if (mdv.getBigInt64(o.ent, true) !== o.pid) throw new Error('Lệch bảng object.');
-    const sz = repl.has(o.pid) ? repl.get(o.pid).length : o.size;
-    mdv.setBigInt64(o.ent + 8, BigInt(newOff.get(o.pid)), true);
-    mdv.setUint32(o.ent + 16, sz, true);
-  }
-  const cabLen = sf.dataOffset + data.length;
-  mdv.setBigInt64(0x18, BigInt(cabLen), false);      // m_FileSize (big-endian)
-
-  const cab = new Uint8Array(cabLen);
-  cab.set(meta, 0); cab.set(data, meta.length);
-  return cab;
-}
-
-/* Dựng lại bundle, tái dùng luồng LZ4 blocksInfo của file gốc */
-function rebuildBundle(orig, b, cab){
-  /* Bản gốc đệm block thêm một số byte 0 sau node (ở đây là 4). Giữ đúng
-     lượng đệm đó thì block — và do đó cả file — dài đúng như cũ. */
-  const pad = b.blocks.reduce((a,x) => a + x.u, 0) - b.nodes[0].size;
-  const block = new Uint8Array(cab.length + Math.max(0, pad));
-  block.set(cab, 0);
-
-  const info = b.info.slice();
-  const idv = new DataView(info.buffer);
-  idv.setUint32(20, block.length, false);           // block.u
-  idv.setUint32(24, block.length, false);           // block.c
-  idv.setBigInt64(42, BigInt(cab.length), false);   // node.size
-
-  const ic = b.flags & 0x3F;
-  let infoOut;
-  if (ic === 0){
-    infoOut = info;
-  } else {
-    /* blocksInfo mới chỉ khác bản gốc ở vài byte kích thước, và những byte đó
-       nằm trong vùng literal của luồng LZ4 — vá thẳng vào luồng đã nén để giữ
-       nguyên độ dài như bản gốc (tự nén lại sẽ dài hơn, làm lệch dung lượng). */
-    const compOrig = orig.slice(b.infoOff, b.infoOff + b.ciSize);
-    const root = lz4Trace(compOrig, b.uiSize);
-    const patched = compOrig.slice();
-    /* Một byte trong luồng nén có thể sinh ra nhiều byte đầu ra (qua match),
-       nên gom yêu cầu lại và chỉ chấp nhận khi mọi byte liên quan cùng giá trị. */
-    const want = new Map();
-    for (let i = 0; i < info.length; i++){
-      const src = root[i];
-      if (src < 0){
-        if (info[i] !== b.info[i])
-          throw new Error(`blocksInfo: byte ${i} không truy được về literal.`);
-        continue;
-      }
-      if (want.has(src) && want.get(src) !== info[i])
-        throw new Error(`blocksInfo: byte ${i} xung đột với byte khác dùng chung nguồn.`);
-      want.set(src, info[i]);
-    }
-    for (const [src, val] of want) patched[src] = val;
-    const check = lz4dec(patched, b.uiSize);
-    for (let i = 0; i < info.length; i++)
-      if (check[i] !== info[i]) throw new Error('blocksInfo vá xong không khớp.');
-    infoOut = patched;
-  }
-
-  const head = [];
-  head.push(enc('UnityFS'), new Uint8Array([0]));
-  const fb = new Uint8Array(4); new DataView(fb.buffer).setUint32(0, b.fmt, false);
-  head.push(fb);
-  head.push(enc(b.uv), new Uint8Array([0]), enc(b.rev), new Uint8Array([0]));
-  const tailH = new Uint8Array(20);
-  const tdv = new DataView(tailH.buffer);
-  tdv.setUint32(8, infoOut.length, false);
-  tdv.setUint32(12, b.uiSize, false);
-  tdv.setUint32(16, b.flags, false);
-  head.push(tailH);
-  let hl = head.reduce((a,x) => a + x.length, 0);
-  const padded = (b.fmt >= 7 || (b.flags & 0x200)) ? ((hl + 15) & ~15) : hl;
-  const hdr = new Uint8Array(padded);
-  let w = 0;
-  for (const x of head){ hdr.set(x, w); w += x.length; }
-  const sizePos = hdr.length - padded + (hl - 20);
-  const total = padded + infoOut.length + block.length;
-  new DataView(hdr.buffer).setBigInt64(sizePos, BigInt(total), false);
-
-  const out = new Uint8Array(total);
-  out.set(hdr, 0); out.set(infoOut, padded); out.set(block, padded + infoOut.length);
-  return out;
-}
-
-function applyPreset2(orig, b, opt){
-  if (b.blocks.some(x => (x.f & 0x3F) !== 0))
-    throw new Error('Bundle có block bị nén — chưa hỗ trợ.');
-  const node = b.nodes[0];
-  const cab = orig.subarray(b.dataStart + node.off, b.dataStart + node.off + node.size);
-  const sf = parseSF(cab);
-
-  const male = sf.objs.find(o => o.pid === MALE_PID);
-  const female = sf.objs.find(o => o.pid === FEMALE_PID);
-  if (!male || !female) throw new Error('Không tìm thấy 2 UMAMeshAsset quen thuộc trong file này.');
-
-  const rows = [];
-  const repl = new Map();
-
-  const pm = patchMesh(sf, male, opt.mx, null, opt.s);
-  if (pm){
-    repl.set(MALE_PID, pm.body);
-    rows.push(['mesh nam', `umaBones[${pm.idx}]`, BACKPACK, 'bone_Head']);
-    rows.push(['', 'position.x', pm.before.x.toFixed(6), pm.after.x.toFixed(6)]);
-    rows.push(['', 'scale', `(${pm.before.sx.toFixed(4)}, ${pm.before.sy.toFixed(4)}, ${pm.before.sz.toFixed(4)})`,
-                            `(${pm.after.sx.toFixed(4)}, ${pm.after.sy.toFixed(4)}, ${pm.after.sz.toFixed(4)})`]);
-  }
-  const pf = patchMesh(sf, female, opt.fx, opt.fz, opt.s);
-  if (pf){
-    repl.set(FEMALE_PID, pf.body);
-    rows.push(['mesh nữ', `umaBones[${pf.idx}]`, BACKPACK, 'bone_Head']);
-    rows.push(['', 'position.x', pf.before.x.toFixed(6), pf.after.x.toFixed(6)]);
-    rows.push(['', 'position.z', pf.before.z.toFixed(6), pf.after.z.toFixed(6)]);
-    rows.push(['', 'scale', `(${pf.before.sx.toFixed(4)}, ${pf.before.sy.toFixed(4)}, ${pf.before.sz.toFixed(4)})`,
-                            `(${pf.after.sx.toFixed(4)}, ${pf.after.sy.toFixed(4)}, ${pf.after.sz.toFixed(4)})`]);
-  }
-  if (!repl.size) throw new Error(`Không tìm thấy xương ${BACKPACK} trong mesh nào — file có thể đã được sửa rồi.`);
-
-  /* Tìm UMAAssetIndexer */
-  const idxObj = sf.objs.find(o => {
-    const t = sf.types[o.tid];
-    if (t.cid !== 114 || !t.nodes) return false;
-    return buildNodes(t).some(n => n.level === 1 && n.name === 'Items');
-  });
-  if (!idxObj) throw new Error('Không tìm thấy UMAAssetIndexer.');
-
-  /* Mọi RaceData / UMATextRecipe trong bundle — để bổ sung mục còn thiếu */
-  const known = [];
-  for (const o of sf.objs){
-    const t = sf.types[o.tid];
-    if (t.cid !== 114 || !t.nodes || o.pid === idxObj.pid) continue;
-    const nn = buildNodes(t).filter(n => n.level === 1).map(n => n.name);
-    const isRace   = nn.includes('raceName');
-    const isRecipe = nn.includes('recipeData');
-    if (!isRace && !isRecipe) continue;
-    const v = readObj(sf, o, null);
-    known.push({ pid: o.pid, name: v.m_Name, typeIndex: isRace ? 2 : 3 });
-  }
-
-  /* Kích thước đích của indexer: bù lại đúng phần mà 2 mesh đã co lại,
-     để tổng CAB — và do đó dung lượng file — không đổi. */
-  let delta = 0;
-  for (const [pid, body] of repl) delta += body.length - sf.objs.find(o => o.pid === pid).size;
-  const targetSize = idxObj.size - delta;
-
-  const si = rebuildIndexer(sf, idxObj, known, targetSize);
-  repl.set(idxObj.pid, si.body);
-  rows.push(['indexer', `${si.names.length} mục`,
-             `${si.names.length - si.addedCount} mục ban đầu`,
-             `thêm ${si.addedCount} mục · _Path rút gọn`]);
-
-  const newCab = rebuildCab(sf, repl);
-  const out = rebuildBundle(orig, b, newCab);
-  return {
-    out,
-    note: `Đã dựng lại bundle — ${repl.size} object thay đổi, dung lượng giữ nguyên ${out.length.toLocaleString('vi-VN')} byte.`,
-    cols: ['Vùng','Trường','Trước','Sau'], rows,
-    extra: si
-  };
-}
-
-/* ═══════════ PRESET 3: shader định vị + đổi màu ═══════════ */
+/* ═══════════ SHADER SÚNG: shader định vị + đổi màu ═══════════ */
 
 /* 3 shader X-Ray trich tu ban mod, nen deflate + base64.
    Dung de ghep vao bundle GOC o preset 3. */
@@ -1190,14 +662,6 @@ const rgb2hex = v =>
   '#' + v.slice(0,3).map(x => Math.round(Math.max(0,Math.min(1,x))*255)
         .toString(16).padStart(2,'0')).join('').toUpperCase();
 
-// Tên thân thiện chỉ dùng để hiển thị trong bảng kết quả.
-const DISPLAY_PROP = {
-  _XRayColor:'Màu súng', _OutLineColor:'Màu viền súng', _DimColor:'Màu keo',
-  _OutLineWidth:'Độ dày viền', _TintColor:'Màu nhân vật', _RimColor:'Màu sáng mép',
-  _ScanColor:'Màu quét', _Line:'Đường quét ngang', _LineAndGlitch:'Nhiễu / giật'
-};
-const displayProp = name => DISPLAY_PROP[name] || name;
-
 /* Những property tool biết cách chỉnh, và lấy giá trị từ đâu */
 const COLOR_MAP = {
   _XRayColor:    { kind:'color', src:'xray', label:'màu súng' },
@@ -1238,7 +702,7 @@ function paintShader(body, opt, short, rows){
     if (rows){
       const sw  = spec.kind === 'color' ? `<span class="swatch" style="background:${before}"></span>` : '';
       const sw2 = spec.kind === 'color' ? `<span class="swatch" style="background:${after}"></span>` : '';
-      rows.push([short, displayProp(p.name), sw + before, sw2 + after]);
+      rows.push([short, p.name, sw + before, sw2 + after]);
     }
   }
   return n;
@@ -1451,7 +915,7 @@ function findSizePos(u8){
   return p;
 }
 
-/* ═══════════ PRESET 4: định vị nhân vật (hologram) ═══════════ */
+/* ═══════════ SHADER NHÂN VẬT: định vị nhân vật (hologram) ═══════════ */
 
 /* hologram.shader goc, nen deflate + base64. Dung de thay toan bo
    shader nhan vat o preset 4. */
@@ -1560,7 +1024,7 @@ function paintHolo(body, opt, rows, label, type){
     if (rows){
       const sw  = spec.kind === 'color' ? `<span class="swatch" style="background:${before}"></span>` : '';
       const sw2 = spec.kind === 'color' ? `<span class="swatch" style="background:${after}"></span>` : '';
-      rows.push([label, displayProp(p.name), sw + before, sw2 + after]);
+      rows.push([label, p.name, sw + before, sw2 + after]);
     }
   }
 
@@ -1572,11 +1036,11 @@ function paintHolo(body, opt, rows, label, type){
     if (old === want) continue;
     dv.setFloat32(off, want, true);
     n++;
-    if (rows) rows.push([label, 'Xuyên tường',
+    if (rows) rows.push([label, 'zTest (xuyên tường)',
       `${old} · ${ZTEST_NAMES[old] || '?'}`, `${want} · ${ZTEST_NAMES[want]}`]);
   }
   if (!zs.length && rows)
-    rows.push([label, 'Xuyên tường', 'Không tìm thấy thiết lập', 'Bỏ qua']);
+    rows.push([label, 'zTest', 'không tìm thấy', '— bỏ qua']);
   return n;
 }
 
@@ -1634,52 +1098,12 @@ async function applyPreset4(orig, b, opt){
   };
 }
 
-/* ═══════════ PRESET 5: Antena Aim Mới ═══════════ */
-const P5_FIND    = new Uint8Array([0x00,0x00,0x80,0x3F,0x16,0x08,0x0E,0xBF]);
-const P5_REPLACE = new Uint8Array([0x00,0x00,0x80,0x63,0x16,0x08,0x0E,0xBF]);
-
-function applyPreset5(orig, b){
-  const out = orig.slice();
-  const from = b.dataStart;
-  const to = orig.length - 8;
-  const hits = [];
-  outer: for (let i = from; i <= to; i++){
-    for (let k = 0; k < 8; k++) if (orig[i+k] !== P5_FIND[k]) continue outer;
-    hits.push(i);
-  }
-  if (!hits.length) throw new Error('Không tìm thấy offset antena trong file này.');
-  for (const at of hits) out.set(P5_REPLACE, at);
-  const rows = hits.map(at => [
-    `0x${hx(at).padStart(6,'0')}`,
-    P5_FIND.map(b=>b.toString(16).padStart(2,'0').toUpperCase()).join(' '),
-    P5_REPLACE.map(b=>b.toString(16).padStart(2,'0').toUpperCase()).join(' ')
-  ]);
-  return {
-    out,
-    note: `Tìm thấy <b>${hits.length}</b> vị trí — đã vá ${hits.length*8} byte.`,
-    cols: ['Offset','Bytes trước','Bytes sau'], rows
-  };
-}
-
 /* ═══════════ giao diện ═══════════ */
 let FILE = null, ORIG = null, BUN = null, KIND = null, DET = null;
-
 function render(el, html){ $(el).innerHTML = html; }
 
-/*
-  Vân tay của các bản gốc đã biết, để phân biệt Free Fire Thường và Max.
-
-  shaders: số shader là dấu hiệu bền — preset 3 không thêm/bớt shader nào.
-
-  assetindexer: hai bản khác nhau DUY NHẤT ở indexer (Thường 8 mục, Max 12).
-  Preset 2 thêm 4 mục vào bản Thường nên nó thành 12 — trùng dấu hiệu của Max.
-  Vì vậy phải dựa vào DUNG LƯỢNG, thứ mà cả 3 preset đều giữ nguyên tuyệt đối.
-*/
+/* Chỉ nhận hai loại shader được hỗ trợ. */
 const BUILDS = {
-  uma: [
-    { name: 'Free Fire Thường', size: 46096, objs: 24, items: 8  },
-    { name: 'Free Fire Max',    size: 46640, objs: 24, items: 12 }
-  ],
   shader: [
     { name: 'Free Fire Thường', size: 1443632, shaders: 146 },
     { name: 'Free Fire Max',    size: 1419165, shaders: 144 }
@@ -1690,152 +1114,50 @@ const BUILDS = {
   ]
 };
 
-/* Tên file gốc trên CDN = Base64(SHA1(nội dung)), '/'→~2F '+'→~2B '='→~3D */
-function sha1b64(bytes){
-  const ml = bytes.length;
-  const pad = new Uint8Array((((ml + 8) >> 6) + 1) << 6);
-  pad.set(bytes); pad[ml] = 0x80;
-  const dv = new DataView(pad.buffer);
-  dv.setUint32(pad.length - 4, (ml << 3) >>> 0, false);
-  dv.setUint32(pad.length - 8, Math.floor(ml / 536870912), false);
-  let h0=0x67452301,h1=0xEFCDAB89,h2=0x98BADCFE,h3=0x10325476,h4=0xC3D2E1F0;
-  const w = new Uint32Array(80);
-  const rol = (x,n) => ((x << n) | (x >>> (32 - n))) >>> 0;
-  for (let i = 0; i < pad.length; i += 64){
-    for (let j = 0; j < 16; j++) w[j] = dv.getUint32(i + j*4, false);
-    for (let j = 16; j < 80; j++) w[j] = rol(w[j-3]^w[j-8]^w[j-14]^w[j-16], 1);
-    let a=h0,b2=h1,c=h2,d=h3,e=h4;
-    for (let j = 0; j < 80; j++){
-      let f, k;
-      if (j < 20)      { f = (b2 & c) | (~b2 & d);              k = 0x5A827999; }
-      else if (j < 40) { f = b2 ^ c ^ d;                        k = 0x6ED9EBA1; }
-      else if (j < 60) { f = (b2 & c) | (b2 & d) | (c & d);     k = 0x8F1BBCDC; }
-      else             { f = b2 ^ c ^ d;                        k = 0xCA62C1D6; }
-      const t = (rol(a,5) + f + e + k + w[j]) >>> 0;
-      e = d; d = c; c = rol(b2, 30); b2 = a; a = t;
-    }
-    h0=(h0+a)>>>0; h1=(h1+b2)>>>0; h2=(h2+c)>>>0; h3=(h3+d)>>>0; h4=(h4+e)>>>0;
-  }
-  const o = new Uint8Array(20), odv = new DataView(o.buffer);
-  [h0,h1,h2,h3,h4].forEach((h,i) => odv.setUint32(i*4, h, false));
-  return btoa(String.fromCharCode(...o));
-}
-const cdnSuffix = b64 => b64.replace(/\+/g,'~2B').replace(/\//g,'~2F').replace(/=/g,'~3D');
-
-/*
-  Nhận diện bundle thuộc loại nào, dựa vào NỘI DUNG chứ không theo tên file.
-    'uma'    → có UMAMeshAsset / UMAAssetIndexer  → preset 1, 2
-    'shader' → có 3 shader định vị                → preset 3
-*/
 function detectKind(orig, b){
   const node = b.nodes[0];
-  if (!node) return { kind: null, why: 'Bundle không có node nào.' };
-
-  let isUMA = false;
-  /* Bundle UMA: 1 block thô, nhận diện nhanh bằng chuỗi tên xương */
-  if (!b.blocks.some(x => (x.f & 0x3F) !== 0)){
-    const from = b.dataStart + node.off, to = from + node.size;
-    const probe = ['bone_Hips', 'bone_Left_Spine_Backpack', 'UMAAssetIndexer'];
-    const hay = orig.subarray(from, to);
-    for (const kw of probe){
-      const pat = enc(kw);
-      outer: for (let i = 0; i <= hay.length - pat.length; i++){
-        for (let k = 0; k < pat.length; k++) if (hay[i+k] !== pat[k]) continue outer;
-        isUMA = true; break;
-      }
-      if (isUMA) break;
-    }
-  }
-
+  if (!node) return { kind: null, why: 'File không có dữ liệu bundle hợp lệ.' };
   try {
     const { data } = decompressAll(orig, b);
     const cab = data.subarray(node.off, node.off + node.size);
     const sf = parseSF(cab);
     const nShader = sf.objs.filter(o => o.cid === 48).length;
+    if (!nShader) return { kind: null, why: 'Không tìm thấy shader được hỗ trợ trong file này.' };
 
-    if (nShader){
-      const ab = sf.objs.find(o => o.cid === 142);
-      let hit = 0, hasHolo = false, hasDecal = false;
-      if (ab){
-        const v = readObj(sf, ab, null);
-        for (const c of v.m_Container){
-          if (isXrayShader(c.first)) hit++;
-          const f = c.first.split('/').pop();
-          if (f === 'hologram.shader') hasHolo = true;
-          if (f === 'brmobilebumpspecdecal.shader') hasDecal = true;
-        }
+    const ab = sf.objs.find(o => o.cid === 142);
+    let hit = 0, hasHolo = false, hasDecal = false;
+    if (ab){
+      const v = readObj(sf, ab, null);
+      for (const c of (v.m_Container || [])){
+        if (isXrayShader(c.first)) hit++;
+        const f = String(c.first || '').split('/').pop();
+        if (f === 'hologram.shader') hasHolo = true;
+        if (f === 'brmobilebumpspecdecal.shader') hasDecal = true;
       }
-
-      /* Hai bundle đều chứa backweapon + brmobilebumpspec, và cả hai đều có
-         hologram — nên phải tách bằng brmobilebumpspecdecal, thứ chỉ bundle
-         súng mới có. Bundle nhân vật = có hologram nhưng không có decal. */
-      if (hasHolo && !hasDecal){
-        let build = BUILDS.holo.find(x => x.shaders === nShader && x.size === orig.length);
-        let guess = false;
-        if (!build){ build = BUILDS.holo.find(x => x.shaders === nShader); guess = !!build; }
-        return {
-          kind: 'holo', build: build ? build.name : null, guess,
-          detail: `bundle shader nhân vật — ${nShader} shader, có hologram`
-        };
-      }
-
-      if (!hit)
-        return { kind: null, why: `Bundle có ${nShader} shader nhưng không có backweapon / brmobilebumpspec / brmobilebumpspecdecal.` };
-      /* Số shader là dấu hiệu bền (preset 3 không thêm/bớt shader nào);
-         dung lượng dùng để xác nhận. Lệch dung lượng thì chỉ là phỏng đoán. */
-      let build = BUILDS.shader.find(x => x.shaders === nShader && x.size === orig.length);
-      let guess = false;
-      if (!build){
-        build = BUILDS.shader.find(x => x.shaders === nShader);
-        guess = !!build;
-      }
-      return {
-        kind: 'shader', build: build ? build.name : null, guess,
-        detail: `bundle shader súng — ${nShader} shader, ${hit} shader định vị`
-      };
     }
 
-    if (isUMA || sf.types.some(t => t.cid === 114)){
-      /* số mục indexer là dấu hiệu phân biệt Thường (8) và Max (12) */
-      let items = null;
-      const idx = sf.objs.find(o => {
-        const t = sf.types[o.tid];
-        return t.cid === 114 && t.nodes &&
-               buildNodes(t).some(n => n.level === 1 && n.name === 'Items');
-      });
-      if (idx){
-        try { items = readObj(sf, idx, null).Items.length; } catch (e) { /* bỏ qua */ }
-      }
-      /* Phân biệt theo dung lượng: Thường 46.096, Max 46.640.
-         Không dùng số mục indexer làm căn cứ chính, vì preset 2 thêm 4 mục vào
-         bản Thường khiến nó cũng thành 12 mục — trùng dấu hiệu của Max. */
-      let build = BUILDS.uma.find(x => x.size === orig.length && x.objs === sf.objs.length);
-      let guess = false;
-      if (!build && items !== null){
-        /* Dung lượng lạ (game cập nhật?) — đoán tạm theo số mục indexer.
-           Chỉ đáng tin khi file chưa qua preset 2. */
-        build = BUILDS.uma.find(x => x.items === items);
-        guess = !!build;
-      }
-      return {
-        kind: 'uma', build: build ? build.name : null, guess,
-        detail: `bundle UMA — ${sf.objs.length} object` +
-                (items !== null ? `, indexer ${items} mục` : '')
-      };
+    if (hasHolo && !hasDecal){
+      const build = BUILDS.holo.find(x => x.shaders === nShader && x.size === orig.length)
+        || BUILDS.holo.find(x => x.shaders === nShader);
+      return { kind: 'holo', build: build ? build.name : null };
     }
+    if (hit){
+      const build = BUILDS.shader.find(x => x.shaders === nShader && x.size === orig.length)
+        || BUILDS.shader.find(x => x.shaders === nShader);
+      return { kind: 'shader', build: build ? build.name : null };
+    }
+    return { kind: null, why: 'File không thuộc hai loại được hỗ trợ.' };
   } catch (e) {
-    return { kind: null, why: `Không đọc được nội dung: ${e.message}` };
+    return { kind: null, why: 'Không thể đọc file này. Hãy chọn đúng file shader gốc của trò chơi.' };
   }
-  return { kind: null, why: 'Không nhận ra đây là bundle UMA hay bundle shader.' };
 }
 
 /* Bật/tắt preset theo loại bundle; tự chọn preset đầu tiên còn dùng được */
 function applyKind(kind){
   const pres = [...document.querySelectorAll('.pre')];
-  const okFor = v => kind === null ? false
-                  : v === '3' ? kind === 'shader'
-                  : v === '4' ? kind === 'holo'
-                  : kind === 'uma';
+  const okFor = v => kind === 'shader' ? v === '3'
+                  : kind === 'holo' ? v === '4'
+                  : false;
   let firstOk = null;
   for (const el of pres){
     const inp = el.querySelector('input');
@@ -1851,19 +1173,14 @@ function applyKind(kind){
   syncPanels();
 }
 
-/* Hiện đúng khung tinh chỉnh cho preset đang chọn */
+/* Hiện bảng màu và chức năng đúng với loại shader đã chọn. */
 function syncPanels(){
   const sel = document.querySelector('input[name=p]:checked');
   const v = sel ? sel.value : null;
   for (const el of document.querySelectorAll('.pre'))
     el.classList.toggle('sel', el.querySelector('input') === sel);
-  const adv = $('#advBox'), col = $('#colBox'), holo = $('#holoBox');
-  adv.classList.toggle('off',  v !== '2');
-  col.classList.toggle('off',  v !== '3');
-  holo.classList.toggle('off', v !== '4');
-  adv.open  = v === '2';
-  col.open  = v === '3';
-  holo.open = v === '4';
+  $('#colBox').classList.toggle('off', v !== '3');
+  $('#holoBox').classList.toggle('off', v !== '4');
 }
 
 async function load(file){
@@ -1871,73 +1188,51 @@ async function load(file){
   $('#go').disabled = true;
   render('#out', '');
   $('#drop').classList.add('has');
-  $('#dropText').innerHTML = `<b>${esc(file.name)}</b><span>Đang đọc và kiểm tra tệp…</span>`;
+  $('#dropText').innerHTML = `<b>${esc(file.name)}</b><span>Đang kiểm tra file…</span>`;
+  render('#info', '<div class="status loading"><span class="status-dot"></span> Đang kiểm tra file đã chọn</div>');
+
   let buf;
   try { buf = await file.arrayBuffer(); }
-  catch(e){ applyKind(null); $('#dropText').innerHTML = `<b>${esc(file.name)}</b><span>Không đọc được tệp này.</span>`; return render('#info', `<div class="msg bad">Không đọc được file: ${esc(e.message)}</div>`); }
+  catch(e){
+    applyKind(null);
+    $('#dropText').innerHTML = '<b>Không đọc được file</b><span>Chạm để chọn lại</span>';
+    return render('#info', '<div class="status error">Không đọc được file. Hãy thử chọn lại.</div>');
+  }
   ORIG = new Uint8Array(buf);
   try { BUN = parseBundle(ORIG); }
-  catch(e){ applyKind(null); $('#dropText').innerHTML = `<b>${esc(file.name)}</b><span>Tệp không hợp lệ hoặc không được hỗ trợ.</span>`; return render('#info', `<div class="msg bad">${esc(e.message)}</div>`); }
+  catch(e){
+    applyKind(null);
+    $('#dropText').innerHTML = `<b>${esc(file.name)}</b><span>Không đúng định dạng được hỗ trợ</span>`;
+    return render('#info', '<div class="status error">File không hợp lệ. Chỉ hỗ trợ <b>shaders</b> và <b>optionalavatarres_commonab_shader</b>.</div>');
+  }
 
-  const node = BUN.nodes[0];
-  const comp = BUN.blocks.filter(x => (x.f & 0x3F) !== 0).length;
   const det = detectKind(ORIG, BUN);
-  KIND = det.kind; DET = det;
+  KIND = (det.kind === 'shader' || det.kind === 'holo') ? det.kind : null;
+  DET = det;
+  if (!KIND){
+    applyKind(null);
+    $('#dropText').innerHTML = `<b>${esc(file.name)}</b><span>File chưa được hỗ trợ · chạm để chọn file khác</span>`;
+    return render('#info', `<div class="status error">${esc(det.why || 'File này chưa được hỗ trợ.')}<span class="status-sub">Chọn shaders hoặc optionalavatarres_commonab_shader.</span></div>`);
+  }
 
-  const warn = BUN.declared !== ORIG.length
-    ? `<div class="msg warn">Trường size trong header (${BUN.declared.toLocaleString('vi-VN')}) khác dung lượng thật (${ORIG.length.toLocaleString('vi-VN')}) — file có thể còn dữ liệu thừa ở đuôi. Tạo file mới sẽ sửa luôn.</div>` : '';
-  const bad = KIND ? '' :
-    `<div class="msg bad">${esc(det.why || 'Không nhận ra loại bundle.')} Tool này chỉ làm việc với <code>assetindexer</code> và <code>shaders</code>.</div>`;
-
-  /* Tên gốc trên CDN là Base64(SHA1) — file đã mod thì hash không còn khớp */
-  const suffix = file.name.includes('.') ? file.name.slice(file.name.indexOf('.') + 1) : '';
-  const nowHash = cdnSuffix(sha1b64(ORIG));
-  const isPristine = suffix && suffix === nowHash;
-
-  const buildRow = det.build
-    ? `<tr><td>Phiên bản</td><td><b>${esc(det.build)}</b>${
-        det.guess ? ' <span class="dim">(phỏng đoán — dung lượng không khớp bản gốc đã biết)</span>'
-                  : (isPristine ? ' · bản gốc' : ' · đã chỉnh sửa')}</td></tr>`
-    : (KIND ? `<tr><td>Phiên bản</td><td>không rõ — dung lượng ${ORIG.length.toLocaleString('vi-VN')} byte không khớp Thường hay Max</td></tr>` : '');
-
-  render('#info', `${warn}${bad}<div class="panel"><h2>File nguồn</h2><table>
-    <tr><td>Tên</td><td>${esc(file.name)}</td></tr>
-    <tr><td>Dung lượng</td><td>${ORIG.length.toLocaleString('vi-VN')} byte</td></tr>
-    ${buildRow}
-    <tr><td>Định dạng</td><td>UnityFS fmt ${BUN.fmt} · ${esc(BUN.rev)}</td></tr>
-    <tr><td>Block</td><td>${BUN.blocks.length} · ${comp ? 'có nén' : 'uncompressed'} · flags 0x${hx(BUN.flags)}</td></tr>
-    ${node ? `<tr><td>Node</td><td>${esc(node.name)} · ${node.size.toLocaleString('vi-VN')} byte</td></tr>` : ''}
-    ${det.detail ? `<tr><td>Nhận diện</td><td>${esc(det.detail)}</td></tr>` : ''}
-  </table></div>`);
-
-  $('#drop').classList.add('has');
-  /* Chỉ thay phần chữ — nếu ghi đè innerHTML của #drop thì <input id="file">
-     bên trong bị huỷ, và lần chọn file sau sẽ không kích hoạt onchange nữa. */
-  $('#dropText').innerHTML =
-    `<b>${esc(file.name)}</b><span>${ORIG.length.toLocaleString('vi-VN')} byte — bấm để chọn file khác</span>`;
+  const kindName = KIND === 'shader' ? 'Shader súng' : 'Shader nhân vật';
+  $('#dropText').innerHTML = `<b>${esc(file.name)}</b><span>Đã nhận diện · chạm để đổi file</span>`;
+  render('#info', `<div class="status ready"><span class="status-dot"></span><div><b>File đã sẵn sàng</b><span class="status-sub">${kindName}${det.build ? ' · ' + esc(det.build) : ''}</span></div><span class="status-tag">OK</span></div>`);
   applyKind(KIND);
-  $('#go').disabled = !KIND;
+  $('#go').disabled = false;
 }
 
 $('#go').onclick = async () => {
-  const chosenPreset = document.querySelector('input[name=p]:checked');
+  const selected = document.querySelector('input[name=p]:checked');
+  if (!selected || !KIND || !ORIG || !BUN) return;
+  const p = selected.value;
   const btn = $('#go');
-  if (!chosenPreset || !ORIG || !BUN) {
-    render('#out', '<div class="msg warn">Hãy chọn một tệp hợp lệ và chế độ xử lý trước khi tạo file.</div>');
-    return;
-  }
-  const p = chosenPreset.value;
   btn.disabled = true;
   const label = btn.textContent;
   btn.textContent = 'Đang xử lý…';
   let res;
   try {
-    if (p === '1') res = applyPreset1(ORIG, BUN);
-    else if (p === '2') res = applyPreset2(ORIG, BUN, {
-      fx: parseFloat($('#fx').value), fz: parseFloat($('#fz').value),
-      mx: parseFloat($('#mx').value), s:  parseFloat($('#sc').value)
-    });
-    else if (p === '3') {
+    if (p === '3') {
       const grab = (id, name) => {
         const v = hex2rgb($('#' + id).value);
         if (!v) throw new Error(`Mã màu ${name} không hợp lệ: "${$('#'+id).value}" (cần dạng #RRGGBB).`);
@@ -1951,8 +1246,7 @@ $('#go').onclick = async () => {
         alpha: parseFloat($('#rAlpha').value)
       });
     }
-    else if (p === '5') res = applyPreset5(ORIG, BUN);
-    else {
+    else if (p === '4') {
       const grab = (id, name) => {
         const v = hex2rgb($('#' + id).value);
         if (!v) throw new Error(`Mã màu ${name} không hợp lệ: "${$('#'+id).value}" (cần dạng #RRGGBB).`);
@@ -1968,52 +1262,23 @@ $('#go').onclick = async () => {
       });
     }
   } catch(e){
-    render('#out', `<div class="msg bad">${esc(e.message)}</div>`);
+    render('#out', `<div class="status error">${esc(e.message || 'Không thể áp dụng tuỳ chỉnh. Hãy thử lại với file gốc phù hợp.')}</div>`);
     return;
   } finally {
     btn.disabled = false;
     btn.textContent = label;
   }
 
-  // Chỉ hiển thị tiến trình hoàn tất và kết quả tải xuống; không xuất bảng thay đổi.
-  btn.disabled = true;
-  btn.textContent = 'Đang hoàn tất…';
-  const waitMs = 620;
+  const kindName = p === '3' ? 'Shader súng' : 'Shader nhân vật';
   render('#out', `
-    <div class="panel finish-panel" role="status" aria-live="polite">
-      <div class="finish-icon"><span class="finish-spinner"></span></div>
-      <h2>Đang hoàn tất file</h2>
-      <p class="finish-copy">Vui lòng đợi trong giây lát…</p>
-      <div class="progress-track"><div id="finishProgress" class="progress-fill"></div></div>
-      <div class="progress-meta"><span id="finishLabel">Đang xử lý</span><b id="finishPct">0%</b></div>
-    </div>`);
-  const progress = $('#finishProgress');
-  const pct = $('#finishPct');
-  const progressLabel = $('#finishLabel');
-  const startedAt = Date.now();
-  await new Promise(resolve => {
-    const tick = () => {
-      const elapsed = Date.now() - startedAt;
-      const ratio = Math.min(1, elapsed / waitMs);
-      // Ease-out, cập nhật đều để thanh tiến trình chạy từ từ.
-      const eased = 1 - Math.pow(1 - ratio, 1.7);
-      const value = Math.min(100, Math.floor(eased * 100));
-      if (progress) progress.style.width = value + '%';
-      if (pct) pct.textContent = value + '%';
-      if (progressLabel) progressLabel.textContent = value < 35 ? 'Đang chuẩn bị' : value < 75 ? 'Đang hoàn tất' : 'Sắp xong';
-      if (ratio < 1) requestAnimationFrame(tick);
-      else resolve();
-    };
-    requestAnimationFrame(tick);
-  });
-
-  render('#out', `
-    <div class="panel finish-panel finish-done">
-      <div class="finish-success">✓</div>
-      <h2>File đã sẵn sàng</h2>
-      <p class="finish-copy">${esc(FILE.name)}</p>
-      <button id="dl" class="download-main">Tải file</button>
-      <div class="continue-wrap"><button id="continueCreate" class="continue-small" type="button">＋ Tạo file khác</button></div>
+    <div class="complete-card">
+      <div class="complete-mark">✓</div>
+      <div class="complete-copy">
+        <span class="complete-kicker">HOÀN TẤT</span>
+        <h3>Đã áp dụng tuỳ chỉnh</h3>
+        <p>${kindName} đã sẵn sàng. Nhấn nút bên dưới để lưu file.</p>
+      </div>
+      <button id="dl" class="save-btn" type="button"><span>Lưu file đã chỉnh</span><span aria-hidden="true">↗</span></button>
     </div>`);
 
   $('#dl').onclick = () => {
@@ -2032,24 +1297,6 @@ $('#go').onclick = async () => {
       setTimeout(() => URL.revokeObjectURL(url), 4000);
     }
   };
-  $('#continueCreate').onclick = () => {
-    $('#file').value = '';
-    $('#out').innerHTML = '';
-    $('#info').innerHTML = '';
-    $('#drop').classList.remove('has');
-    $('#dropText').innerHTML = '<b>Chọn tệp để bắt đầu</b><span>File hỗ trợ: <code>assetindexer</code> · <code>shaders</code> · <code>optionalavatarres_commonab_shader</code></span>';
-    $('#go').disabled = true;
-    for (const el of document.querySelectorAll('.pre')) {
-      el.classList.add('off');
-      el.querySelector('input').checked = false;
-    }
-    for (const id of ['advBox', 'colBox', 'holoBox']) $('#' + id).classList.add('off');
-    FILE = null; ORIG = null; BUN = null; KIND = null; DET = null;
-    window.scrollTo({top: 0, behavior: 'smooth'});
-    $('#file').click();
-  };
-  btn.disabled = false;
-  btn.textContent = label;
 };
 
 /* chọn preset */
@@ -2066,7 +1313,7 @@ for (const el of document.querySelectorAll('.pre')){
   el.classList.add('off');
   el.querySelector('input').checked = false;
 }
-for (const id of ['advBox', 'colBox', 'holoBox']) $('#' + id).classList.add('off');
+for (const id of ['colBox', 'holoBox']) $('#' + id).classList.add('off');
 $('#go').disabled = true;
 
 /* bộ chọn màu: đồng bộ hai chiều giữa ô màu và ô mã hex */
@@ -2101,15 +1348,5 @@ input.onchange = () => {
 ['dragleave','drop'].forEach(ev =>
   drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
 drop.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) load(f); });
-
-/* Hỗ trợ bàn phím cho vùng chọn tệp; không chặn thao tác phóng to của iOS. */
-drop.addEventListener('keydown', e => {
-  if (e.key === 'Enter' || e.key === ' ') {
-    e.preventDefault();
-    input.click();
-  }
-});
-
-  </script>
-</body>
+</script>
 </html>
